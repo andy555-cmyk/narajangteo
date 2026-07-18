@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나라장터 공고 스캔 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+ --canvas:#F1EFEB; --card:#FFFFFF; --ink:#1A1A1A; --ink2:#3A3A38; --muted:#8C8C86;
+ --line:#ECEAE5; --accent:#E9663A; --accent-2:#F2916B; --accent-soft:#FCEEE7;
+ --gn:#2E9E5B; --gn-bg:#E9F6EF; --am:#C6871F; --am-bg:#FBF1DC; --rd:#D6493C; --rd-bg:#FBE7E4;
+ --bl:#2B7BB0; --bl-bg:#E6F1FA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--ink);
+ font-family:'Pretendard','Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+ line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding:34px 26px 60px}
+.wrap{max-width:1180px;margin:0 auto}
+.mono{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:-.01em}
+
+/* 헤더 */
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:30px;font-weight:800;letter-spacing:-.035em;line-height:1.12;margin:7px 0 7px;color:var(--ink)}
+.sub{color:var(--muted);font-size:13.5px}
+.sub b{color:var(--ink2);font-weight:600}
+
+/* KPI bento */
+.kpis{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr 1fr;gap:14px;margin:26px 0 20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;
+ box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 26px -16px rgba(0,0,0,.14);position:relative;min-height:120px;
+ display:flex;flex-direction:column;justify-content:space-between}
+.kpi.hero{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);border:0;color:#fff}
+.kpi .top{display:flex;justify-content:space-between;align-items:flex-start}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:500}
+.kpi.hero .l{color:rgba(255,255,255,.9)}
+.kpi .ic{width:30px;height:30px;border-radius:9px;background:#F6F4F0;display:flex;align-items:center;justify-content:center}
+.kpi.hero .ic{background:rgba(255,255,255,.2)}
+.kpi .ic svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.7}
+.kpi.hero .ic svg{stroke:#fff}
+.kpi .n{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.kpi .cap{font-size:11.5px;color:var(--muted);margin-top:5px}
+.kpi.hero .cap{color:rgba(255,255,255,.85)}
+
+/* 분석(가로 막대) */
+.analytics{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.acard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;
+ box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 26px -16px rgba(0,0,0,.14)}
+.acard h3{font-size:13.5px;font-weight:700;letter-spacing:-.01em;margin-bottom:16px}
+.acard h3 .c{color:var(--muted);font-weight:500;font-size:12px;margin-left:5px}
+.brow{display:grid;grid-template-columns:96px 1fr 40px;align-items:center;gap:10px;margin:9px 0}
+.brow .bl{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btrack{height:9px;background:#F1EFEB;border-radius:6px;overflow:hidden}
+.bfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.bfill.gn{background:var(--gn)} .bfill.am{background:var(--am)} .bfill.rd{background:var(--rd)}
+.brow .bn{font-size:12px;font-weight:700;text-align:right;color:var(--ink2)}
+@media(max-width:860px){.analytics{grid-template-columns:1fr}}
+
+/* 테이블 카드 */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px 8px 8px;
+ box-shadow:0 1px 2px rgba(0,0,0,.03),0 14px 34px -20px rgba(0,0,0,.16)}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 16px 12px;flex-wrap:wrap}
+.ptitle{font-size:16px;font-weight:700;letter-spacing:-.02em}
+.ptitle .c{color:var(--muted);font-weight:500;font-size:13px;margin-left:6px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{position:relative}
+.search input{width:210px;max-width:48vw;padding:8px 13px 8px 32px;border:1px solid var(--line);border-radius:22px;
+ font-size:13px;font-family:inherit;background:#FAF9F7;color:var(--ink)}
+.search input:focus{outline:none;border-color:var(--accent);background:#fff}
+.search svg{position:absolute;left:11px;top:9px;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.8}
+
+.chips{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 16px 12px}
+.chips .lab{font-size:11px;color:var(--muted);margin:0 3px}
+.chip{padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:#fff;
+ font-size:12.5px;color:var(--ink2);cursor:pointer;transition:.12s}
+.chip:hover{border-color:var(--accent-2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;letter-spacing:.03em;
+ text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+ background:#FAF9F7;white-space:nowrap}
+thead th.sortable{cursor:pointer;user-select:none}
+thead th.sortable:hover{color:var(--accent)}
+thead th .ar{opacity:.55;font-size:9px;margin-left:2px}
+tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#FBFAF8}
+.name{font-weight:600;color:var(--ink);text-decoration:none;letter-spacing:-.01em;font-size:13.5px}
+.name:hover{color:var(--accent);text-decoration:underline}
+.org{color:var(--muted);font-size:11.5px;margin-top:3px}
+.amt{font-weight:700;font-size:15px;white-space:nowrap}
+.kw{color:var(--muted);font-size:11px}
+.clse{font-weight:600;font-size:12.5px}
+.dd{font-size:11px;color:var(--muted);margin-top:2px}
+.dd.near{color:var(--rd);font-weight:700}
+
+/* 등급 pill */
+.g{display:inline-block;padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700}
+.g-S{background:var(--ink);color:#fff}
+.g-W{background:#F0EEEA;color:var(--muted)}
+/* 상태 점(●) */
+.st{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.st .d{width:8px;height:8px;border-radius:50%}
+.st-자동추출{color:var(--gn)} .st-자동추출 .d{background:var(--gn)}
+.st-규격서별도{color:var(--am)} .st-규격서별도 .d{background:var(--am)}
+.st-첨부없음{color:var(--rd)} .st-첨부없음 .d{background:var(--rd)}
+.reg{display:inline-block;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:600;background:var(--bl-bg);color:var(--bl)}
+.empty{padding:44px;text-align:center;color:var(--muted);font-size:13px}
+
+.foot{margin-top:18px;font-size:11.5px;color:var(--muted);line-height:1.8}
+.foot code{background:#E7E5E0;padding:1px 6px;border-radius:5px;font-size:11px}
+@media(max-width:860px){.kpis{grid-template-columns:1fr 1fr}.hide-sm{display:none}}
+</style></head>
+<body><div class="wrap">
+<div class="eyebrow">나라장터 · 공공디자인 공고 스캔</div>
+<h1>수주 타깃 공고 대시보드</h1>
+<div class="sub">스캔 기간 <b>2026-07-11 ~ 07-18</b> · 전체 용역공고 <b class="mono">2823</b>건 →
+ 필터 채택 <b class="mono">18</b>건 · 생성 2026-07-18 20:55</div>
+<div style="margin:14px 0 -6px"><a href="reports.html" style="display:inline-block;padding:9px 16px;background:#E9663A;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px">📑 과업분석 보고서 모음 (적극·조건부·보류) →</a></div>
+
+<div class="kpis">
+ <div class="kpi hero">
+   <div class="top"><span class="l">채택 타깃 공고</span>
+     <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/></svg></span></div>
+   <div><div class="n mono">18</div><div class="cap">전체 2823건 중 선별</div></div>
+ </div>
+ <div class="kpi">
+   <div class="top"><span class="l">STRONG 등급</span>
+     <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.4l6-.8z"/></svg></span></div>
+   <div><div class="n mono">6</div><div class="cap">강신호 매칭</div></div>
+ </div>
+ <div class="kpi">
+   <div class="top"><span class="l">RFP 자동추출</span>
+     <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg></span></div>
+   <div><div class="n mono">13</div><div class="cap">API로 즉시 확보</div></div>
+ </div>
+ <div class="kpi">
+   <div class="top"><span class="l">부·울·경 관련</span>
+     <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span></div>
+   <div><div class="n mono">5</div><div class="cap">지역 우선 타깃</div></div>
+ </div>
+ <div class="kpi">
+   <div class="top"><span class="l">최대 기초금액</span>
+     <span class="ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span></div>
+   <div><div class="n mono">11.2억</div><div class="cap">단일 공고 최대</div></div>
+ </div>
+</div>
+
+<div class="analytics">
+ <div class="acard">
+   <h3>매칭 키워드 분포<span class="c">채택 18건 기준</span></h3>
+   <div class="brow"><div class="bl">전시</div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bn">8건</div></div>
+<div class="brow"><div class="bl">체험</div><div class="btrack"><div class="bfill" style="width:88%"></div></div><div class="bn">7건</div></div>
+<div class="brow"><div class="bl">콘텐츠</div><div class="btrack"><div class="bfill" style="width:75%"></div></div><div class="bn">6건</div></div>
+<div class="brow"><div class="bl">디자인</div><div class="btrack"><div class="bfill" style="width:50%"></div></div><div class="bn">4건</div></div>
+<div class="brow"><div class="bl">도시재생</div><div class="btrack"><div class="bfill" style="width:38%"></div></div><div class="bn">3건</div></div>
+<div class="brow"><div class="bl">경관</div><div class="btrack"><div class="bfill" style="width:25%"></div></div><div class="bn">2건</div></div>
+<div class="brow"><div class="bl">공간디자인</div><div class="btrack"><div class="bfill" style="width:12%"></div></div><div class="bn">1건</div></div>
+<div class="brow"><div class="bl">활성화</div><div class="btrack"><div class="bfill" style="width:12%"></div></div><div class="bn">1건</div></div>
+ </div>
+ <div class="acard">
+   <h3>RFP 확보경로 분포<span class="c">자동추출이 많을수록 자동화 유리</span></h3>
+   <div class="brow"><div class="bl">자동추출</div><div class="btrack"><div class="bfill gn" style="width:100%"></div></div><div class="bn">13건</div></div>
+<div class="brow"><div class="bl">규격서별도</div><div class="btrack"><div class="bfill am" style="width:31%"></div></div><div class="bn">4건</div></div>
+<div class="brow"><div class="bl">첨부없음</div><div class="btrack"><div class="bfill rd" style="width:8%"></div></div><div class="bn">1건</div></div>
+ </div>
+</div>
+
+<div class="panel">
+ <div class="phead">
+   <div class="ptitle">타깃 공고 <span class="c">총 18건</span></div>
+   <div class="tools">
+     <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+       <input id="q" placeholder="공고명·기관 검색" oninput="render()"></div>
+   </div>
+ </div>
+ <div class="chips">
+   <span class="lab">등급</span>
+   <span class="chip on" data-k="grade" data-v="">전체</span>
+   <span class="chip" data-k="grade" data-v="S">STRONG</span>
+   <span class="chip" data-k="grade" data-v="W">WEAK</span>
+   <span class="lab" style="margin-left:8px">RFP</span>
+   <span class="chip on" data-k="rfp" data-v="">전체</span>
+   <span class="chip" data-k="rfp" data-v="자동추출">자동추출</span>
+   <span class="chip" data-k="rfp" data-v="규격서별도">규격서별도</span>
+   <span class="chip" data-k="rfp" data-v="첨부없음">첨부없음</span>
+   <span class="lab" style="margin-left:8px">지역</span>
+   <span class="chip on" data-k="region" data-v="">전체</span>
+   <span class="chip" data-k="region" data-v="1">부울경</span>
+ </div>
+ <table>
+ <thead><tr>
+   <th>등급</th><th>공고명 / 수요기관</th>
+   <th class="sortable" data-s="amt">기초금액<span class="ar" id="ar-amt">▼</span></th>
+   <th class="sortable" data-s="dday">마감<span class="ar" id="ar-dday"></span></th>
+   <th>RFP 확보</th><th class="hide-sm">지역</th><th class="hide-sm">매칭키워드</th>
+ </tr></thead>
+ <tbody id="tb"></tbody>
+ </table>
+ <div class="empty" id="empty" style="display:none">조건에 맞는 공고가 없습니다.</div>
+</div>
+
+<div class="foot">
+ <b>RFP 확보</b> — <span class="st st-자동추출"><span class="d"></span>자동추출</span> API에 제안요청서 포함, 즉시 텍스트화 ·
+ <span class="st st-규격서별도"><span class="d"></span>규격서별도</span> 입찰공고서만, g2b 규격탭 브라우저 필요 ·
+ <span class="st st-첨부없음"><span class="d"></span>첨부없음</span> 방문·전화 확인.<br>
+ 이 대시보드는 <code>g2b_scan.py</code> 실행 시점의 스냅샷입니다. 스캔을 다시 돌리면 최신 공고로 갱신됩니다.
+</div>
+</div>
+
+<script>
+const DATA = [{"grade": "S", "rfp": "규격서별도", "region": false, "name": "국립과천과학관 첨단기술 전시를 위한 공간디자인 및 환경조성", "org": "과학기술정보통신부 국립과천과학관", "amt": 1116709091, "amtLabel": "11.2억", "clse": "2026-08-06 10:00:00", "dday": 19, "kw": "공간디자인,디자인,전시", "no": "R26BK01636761", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01636761&bidPbancOrd=000"}, {"grade": "S", "rfp": "자동추출", "region": true, "name": "안동시 도시재생 전략계획 및 활성화 수립 용역(협상)", "org": "경상북도 안동시", "amt": 281172727, "amtLabel": "2.8억", "clse": "", "dday": null, "kw": "도시재생,활성화", "no": "R26BK01631069", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01631069&bidPbancOrd=000"}, {"grade": "S", "rfp": "자동추출", "region": false, "name": "제23회 익산 천만송이 국화축제 행사장 공간조성 및 야간경관 조명 설치 운영 용역", "org": "전북특별자치도 익산시", "amt": 163636364, "amtLabel": "1.6억", "clse": "2026-08-06 16:00:00", "dday": 19, "kw": "경관,야간경관", "no": "R26BK01636322", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01636322&bidPbancOrd=000"}, {"grade": "S", "rfp": "자동추출", "region": false, "name": "신장2동 도시재생뉴딜사업 지역역량강화 용역(5차)(협상에의한계약)", "org": "경기도 평택시", "amt": 145454545, "amtLabel": "1.5억", "clse": "2026-08-06 10:00:00", "dday": 19, "kw": "도시재생", "no": "R26BK01636967", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01636967&bidPbancOrd=000"}, {"grade": "S", "rfp": "자동추출", "region": true, "name": "[재공고]구미시 도시재생전략계획(2026~2035년) 수립 용역", "org": "경상북도 구미시", "amt": 90909091, "amtLabel": "9,090만", "clse": "", "dday": null, "kw": "도시재생", "no": "R26BK01637890", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01637890&bidPbancOrd=000"}, {"grade": "S", "rfp": "자동추출", "region": false, "name": "용봉패션의거리  거리조명 경관조명 설치사업", "org": "용봉패션의거리 문화관광형시장 육성사업단", "amt": 68181818, "amtLabel": "6,818만", "clse": "", "dday": null, "kw": "경관", "no": "R26BK01628861", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01628861&bidPbancOrd=000"}, {"grade": "W", "rfp": "규격서별도", "region": false, "name": "2023년 태안군 강소형 스마트시티 조성사업의 드론 체험관 내 드론 모험 콘텐츠 개발, 설치 사업", "org": "주식회사 다온아이앤씨", "amt": 550000000, "amtLabel": "5.5억", "clse": "2026-07-27 16:00:00", "dday": 9, "kw": "콘텐츠,체험", "no": "R26BK01634700", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01634700&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": false, "name": "구석기전망대 공간연출 및 실감형 체험 콘텐츠 조성 용역(협상)", "org": "충청남도 공주시", "amt": 390909091, "amtLabel": "3.9억", "clse": "2026-08-05 10:00:00", "dday": 18, "kw": "콘텐츠,체험", "no": "R26BK01632179", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01632179&bidPbancOrd=000"}, {"grade": "W", "rfp": "첨부없음", "region": true, "name": "스마트팜 혁신밸리 체험·전시시설 조성사업(협상에 의한 계약)", "org": "경상북도 상주시", "amt": 363636364, "amtLabel": "3.6억", "clse": "", "dday": null, "kw": "전시,체험", "no": "R26BK01624121", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01624121&bidPbancOrd=001"}, {"grade": "W", "rfp": "자동추출", "region": true, "name": "스마트팜 혁신밸리 체험·전시시설 조성사업(협상에 의한 계약)", "org": "경상북도 상주시", "amt": 363636364, "amtLabel": "3.6억", "clse": "", "dday": null, "kw": "전시,체험", "no": "R26BK01633323", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01633323&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": false, "name": "규장각한국학연구원 전시실 실감형 콘텐츠 제작 및 설치", "org": "서울대학교 부속시설 규장각한국학연구원", "amt": 272727273, "amtLabel": "2.7억", "clse": "2026-07-27 14:00:00", "dday": 9, "kw": "콘텐츠,전시", "no": "R26BK01628453", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01628453&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": false, "name": "[입찰공고]강정마을 한울타리센터 역사체험관 전시콘텐츠 제작·설치 및 공간구성 용역(협상에의한계약)", "org": "제주특별자치도 서귀포시", "amt": 227272727, "amtLabel": "2.3억", "clse": "2026-08-04 16:00:00", "dday": 17, "kw": "콘텐츠,전시,체험", "no": "R26BK01625303", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01625303&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": false, "name": "[긴급] 동빙고어린이영어도서관 인터랙티브 콘텐츠 체험 시스템 구축 용역", "org": "서울특별시 용산구", "amt": 170000000, "amtLabel": "1.7억", "clse": "2026-07-24 17:00:00", "dday": 6, "kw": "콘텐츠,체험", "no": "R26BK01630396", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01630396&bidPbancOrd=000"}, {"grade": "W", "rfp": "규격서별도", "region": false, "name": "2026 이태리 베로나석재전 한국관 전시디자인설치공사 업체 선정 입찰공고", "org": "한국공구공업협동조합", "amt": 137824000, "amtLabel": "1.4억", "clse": "", "dday": null, "kw": "디자인,전시", "no": "R26BK01636756", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01636756&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": false, "name": "「제주삼다수X에코랜드」지역기반 상설체험전시관 운영 용역", "org": "제주특별자치도개발공사", "amt": 136351818, "amtLabel": "1.4억", "clse": "2026-08-05 16:00:00", "dday": 18, "kw": "전시,체험", "no": "R26BK01631289", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01631289&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": false, "name": "2026년 수원화성박물관 특별기획전 전시디자인 및 설치용역(협상)", "org": "경기도 수원시", "amt": 104545455, "amtLabel": "1.0억", "clse": "2026-07-24 16:00:00", "dday": 6, "kw": "디자인,전시", "no": "R26BK01629281", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01629281&bidPbancOrd=000"}, {"grade": "W", "rfp": "규격서별도", "region": false, "name": "글로벌 홍보 및 브랜딩 콘텐츠 제작 용역", "org": "(주)지앤지인텍", "amt": 102100900, "amtLabel": "1.0억", "clse": "2026-07-27 18:00:00", "dday": 9, "kw": "브랜딩,콘텐츠", "no": "R26BK01634964", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01634964&bidPbancOrd=000"}, {"grade": "W", "rfp": "자동추출", "region": true, "name": "제31회 부산국제영화제 티켓 카탈로그 디자인 및 인쇄 용역업체 입찰 공고(재공고)", "org": "(사)부산국제영화제", "amt": 63636364, "amtLabel": "6,363만", "clse": "2026-07-27 16:00:00", "dday": 9, "kw": "디자인,인쇄", "no": "R26BK01636885", "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01636885&bidPbancOrd=000"}];
+const F = {grade:"", rfp:"", region:""};
+let sortKey = "amt", sortDir = -1;
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+ const k=c.dataset.k;
+ document.querySelectorAll('.chip[data-k="'+k+'"]').forEach(x=>x.classList.remove('on'));
+ c.classList.add('on'); F[k]=c.dataset.v; render();
+});
+document.querySelectorAll('th.sortable').forEach(th=>th.onclick=()=>{
+ const s=th.dataset.s;
+ if(sortKey===s) sortDir*=-1; else {sortKey=s; sortDir = s==="amt"?-1:1;}
+ document.querySelectorAll('.ar').forEach(a=>a.textContent="");
+ document.getElementById('ar-'+s).textContent = sortDir<0?"▼":"▲";
+ render();
+});
+function render(){
+ const q=(document.getElementById('q').value||"").trim().toLowerCase();
+ let rows=DATA.filter(d=>
+   (!F.grade||d.grade===F.grade)&&(!F.rfp||d.rfp===F.rfp)&&
+   (!F.region||d.region===true)&&(!q||(d.name+d.org).toLowerCase().includes(q)));
+ rows.sort((a,b)=>{let av=a[sortKey]??-1e9,bv=b[sortKey]??-1e9;return (av<bv?-1:av>bv?1:0)*sortDir;});
+ document.getElementById('tb').innerHTML = rows.map(d=>{
+   const near=d.dday!==null&&d.dday>=0&&d.dday<=10;
+   const ddTxt=d.dday===null?'':(d.dday<0?'마감':'D-'+d.dday);
+   return `<tr>
+    <td><span class="g g-${d.grade}">${d.grade}</span></td>
+    <td><a class="name" href="${d.url}" target="_blank" rel="noopener">${esc(d.name)}</a>
+        <div class="org">${esc(d.org)}</div></td>
+    <td><span class="amt mono">${d.amtLabel}</span></td>
+    <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${near?'near':''}">${ddTxt}</div></td>
+    <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
+    <td class="hide-sm">${d.region?'<span class="reg">부울경</span>':''}</td>
+    <td class="hide-sm"><span class="kw">${esc(d.kw)}</span></td>
+   </tr>`;
+ }).join('');
+ document.getElementById('empty').style.display = rows.length?'none':'block';
+}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+render();
+</script>
+</body></html>

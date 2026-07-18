@@ -1,0 +1,572 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>나라장터 수주 판단 보고서 모음</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#1A1A1A;--ink2:#3A3A38;--muted:#8C8C86;--line:#E7E5E0;--soft:#FAF9F7;
+ --accent:#E9663A;--go:#2E9E5B;--go-bg:#E9F6EF;--cond:#C6871F;--cond-bg:#FBF1DC;--hold:#D6493C;--hold-bg:#FBE7E4;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#EDECE8;font-family:'Pretendard','Noto Sans KR',-apple-system,'Malgun Gothic',sans-serif;
+ color:var(--ink);line-height:1.5;padding:24px;-webkit-font-smoothing:antialiased}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:16mm 15mm;
+ box-shadow:0 4px 30px -10px rgba(0,0,0,.25)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:11px}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-top:5px;max-width:135mm}
+.meta{text-align:right;font-size:10.5px;color:var(--muted);line-height:1.6;white-space:nowrap}
+.meta b{color:var(--ink2)}
+/* 판정 배지 */
+.verdict{display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:12px 16px;border-radius:12px;border:1px solid var(--line)}
+.verdict.go{background:var(--go-bg)} .verdict.cond{background:var(--cond-bg)} .verdict.hold{background:var(--hold-bg)}
+.vlabel{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted)}
+.vbig{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.verdict.go .vbig{color:var(--go)} .verdict.cond .vbig{color:var(--cond)} .verdict.hold .vbig{color:var(--hold)}
+.vdot{width:11px;height:11px;border-radius:50%}
+.verdict.go .vdot{background:var(--go)} .verdict.cond .vdot{background:var(--cond)} .verdict.hold .vdot{background:var(--hold)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;margin-top:14px}
+section{break-inside:avoid}
+h2{font-size:12px;font-weight:800;letter-spacing:-.01em;margin-bottom:7px;padding-left:8px;border-left:3px solid var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+.ov th{text-align:left;color:var(--muted);font-weight:600;padding:4px 8px 4px 0;white-space:nowrap;vertical-align:top;width:66px}
+.ov td{padding:4px 0;color:var(--ink2);border-bottom:1px solid var(--soft)}
+.summary{font-size:11.5px;color:var(--ink2);line-height:1.6;background:var(--soft);padding:11px 13px;border-radius:9px}
+ul{list-style:none;font-size:11px;color:var(--ink2)}
+ul li{position:relative;padding-left:13px;margin:4px 0;line-height:1.5}
+ul li:before{content:"";position:absolute;left:2px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.sc{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:2px}
+.sc th{background:var(--soft);color:var(--muted);font-weight:600;text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.sc td{padding:5px 8px;border-bottom:1px solid var(--soft);color:var(--ink2)}
+.sc td.pt{text-align:right;font-weight:700;color:var(--ink)}
+.sc tr.hi td{background:#FCF1EC}
+.sc tr.hi td:first-child{font-weight:700;color:var(--ink)}
+.note{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.foot{margin-top:16px;border-top:1px solid var(--line);padding-top:8px;font-size:9.5px;color:var(--muted);line-height:1.5}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none;margin:0}@page{size:A4;margin:0}}
+</style>
+<style>
+#list{max-width:860px;margin:0 auto}
+.lhead{margin-bottom:6px}
+.lhead .eb{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.lhead h1{font-size:26px;font-weight:800;letter-spacing:-.03em;margin:6px 0 4px}
+.lhead .s{color:var(--muted);font-size:13px}
+.legend{display:flex;gap:16px;margin:16px 0 22px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.grp{font-size:13px;font-weight:800;letter-spacing:-.01em;margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+.grp .gc{color:var(--muted);font-weight:600;font-size:12px}
+.gdot{width:10px;height:10px;border-radius:50%} .gdot.go{background:var(--go)} .gdot.cond{background:var(--cond)} .gdot.hold{background:var(--hold)}
+.row{background:#fff;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:12px;padding:14px 16px;margin:8px 0;cursor:pointer;transition:.12s}
+.row:hover{box-shadow:0 8px 22px -14px rgba(0,0,0,.25);transform:translateY(-1px)}
+.row.go{border-left-color:var(--go)} .row.cond{border-left-color:var(--cond)} .row.hold{border-left-color:var(--hold)}
+.rname{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+.rmeta{font-size:11.5px;color:var(--muted);margin-top:3px}
+.rwhy{font-size:12px;color:var(--ink2);margin-top:6px;line-height:1.5}
+.back{display:block;margin:0 auto 14px;max-width:210mm;width:100%;padding:9px;border:1px solid var(--line);
+ background:#fff;border-radius:9px;font-family:inherit;font-size:13px;color:var(--ink2);cursor:pointer}
+.back:hover{border-color:var(--accent);color:var(--accent)}
+body{background:#EDECE8}
+@media print{#list,.back{display:none!important} .rep{display:block!important}}
+</style></head><body>
+<div id="list">
+ <div class="lhead"><div class="eb">나라장터 · 공공디자인</div>
+   <h1>수주 판단 보고서 모음</h1>
+   <div class="s">자동추출 13건 · 각 공고 A4 과업분석보고서 · 생성 2026-07-18</div></div>
+ <div class="legend">
+   <span><span class="gdot go"></span>적극 검토 = 우리 역량 직결, 바로 붙을 판</span>
+   <span><span class="gdot cond"></span>조건부 검토 = 자격·지역 등 전제 해결 시</span>
+   <span><span class="gdot hold"></span>보류 = 자격·본질상 우리 일 아님</span>
+ </div>
+ <div class="grp"><span class="gdot go"></span>적극 검토 <span class="gc">2건</span></div><div class="row go" onclick="show('R26BK01632179')"><div class="rname">구석기전망대 공간연출 및 실감형 체험 콘텐츠 조성 용역</div><div class="rmeta">충청남도 공주시 문화유산과 (석장리박물관팀) · 4.3억 (VAT 포함) · 마감 2026-08-05 10:00 (D-18)</div><div class="rwhy">태종대 서비스디자인·웨이파인딩·공간연출·실감콘텐츠와 판박이 역량 — 우리 검증된 주력 영역</div></div><div class="row go" onclick="show('R26BK01629281')"><div class="rname">2026년 수원화성박물관 특별기획전 전시디자인 및 설치용역</div><div class="rmeta">경기도 수원시 (수원시박물관사업소 · 수원화성박물관) · 1.15억 (VAT 포함) · 마감 2026-07-24 16:00 (D-6)</div><div class="rwhy">박물관 특별기획전 전시디자인·공간연출·제작·설치는 시그마애드(호진팀) 주력 그 자체 — 태종대·부산디자인클러스터·전시디자인 실적과 직결되는 판박이 과업</div></div><div class="grp"><span class="gdot cond"></span>조건부 검토 <span class="gc">3건</span></div><div class="row cond" onclick="show('R26BK01628453')"><div class="rname">규장각한국학연구원 전시실 실감형 콘텐츠 제작 및 설치</div><div class="rmeta">서울대학교 규장각한국학연구원 · 3억 (VAT 포함) · 마감 2026-07-27 14:00 (D-9)</div><div class="rwhy">전시실 실감형 영상콘텐츠 5종 6건 제작·설치 = 전시디자인+실감콘텐츠 주력과 직결. 동궐도 3D모델링·전통회화 모션, 프로젝션·LED 미디어 연출은 태종대·부산디자인클러스터에서 검증한 강점 구간</div></div><div class="row cond" onclick="show('R26BK01625303')"><div class="rname">강정마을 한울타리센터 역사체험관 전시콘텐츠 제작·설치 및 공간구성 용역</div><div class="rmeta">제주특별자치도 서귀포시 시민소통지원실 (관광미항지원팀) · 2.5억 (VAT 포함) · 마감 2026-08-04 16:00 (D-17)</div><div class="rwhy">과업 성격(역사체험관 전시콘텐츠 기획·제작·설치+스토리텔링 공간연출+공용부 인테리어)이 우리 주력(태종대·전시디자인·공간연출)과 정면으로 일치</div></div><div class="row cond" onclick="show('R26BK01631289')"><div class="rname">「제주삼다수X에코랜드」지역기반 상설체험전시관 운영 용역</div><div class="rmeta">제주특별자치도개발공사 (마케팅팀) · 1.5억 (VAT 포함) · 마감 2026-08-05 16:00 (D-18)</div><div class="rwhy">전시 콘셉트·콘텐츠 기획, 공간디자인, 상시·테마 전시물 및 실외 조형물 제작·설치·연출(조명·그래픽·사인)은 태종대·전시디자인·공간연출 우리 검증 역량과 정확히 겹침</div></div><div class="grp"><span class="gdot hold"></span>보류 <span class="gc">8건</span></div><div class="row hold" onclick="show('R26BK01633323')"><div class="rname">스마트팜 혁신밸리 체험·전시시설 조성사업 (협상에 의한 계약)</div><div class="rmeta">경상북도 상주시 스마트농업과 · 4억원 (VAT 포함) · 마감 미정 — 공고 2026.7 · 제안서평가 2026.8 (공고문 상 접수마감 일시 별도 지정) / 생성일 D-미정</div><div class="rwhy">콘텐츠 기획·미디어아트·공간연출·스토리텔링 동선 등 정성 승부처는 태종대·부산디자인클러스터에서 검증된 우리 주력과 정확히 일치</div></div><div class="row hold" onclick="show('R26BK01631069')"><div class="rname">안동시 도시재생 전략계획 및 활성화 수립 용역(협상)</div><div class="rmeta">경상북도 안동시 (건축과) · 3.09억 (VAT 포함) · 마감 확인 필요 (공고 메타 clse 값 없음 — 원문 공고서에서 제안서 접수 마감일시 확인)</div><div class="rwhy">과업 본질이 「도시재생법」 제12·13조 법정 &#x27;전략계획 수립(정비)&#x27; — 쇠퇴진단·활성화지역 지정·재원조달·추진체계·성과관리로, 도시계획 엔지니어링사/학술연구기관의 정통 영역이며 시그마애드(호진팀)의 공공디자인·전시·공간연출·경관 정체성과 본질적으로 다르다</div></div><div class="row hold" onclick="show('R26BK01630396')"><div class="rname">동빙고어린이영어도서관 인터랙티브 콘텐츠 체험 시스템 구축 용역</div><div class="rmeta">서울특별시 용산구 (교육지원과 독서진흥팀) · 1.87억 (VAT 포함) · 마감 2026-07-24 17:00 (D-6)</div><div class="rwhy">★ 실질이 IT SI·SW개발 사업 — 요구사항이 SFR(기능개발)·DAR(데이터 표준화·모델링·이관)·SER(시큐어코딩)·표준프레임워크·OpenAPI 연계 중심으로, 우리 주력인 공간연출·전시디자인이 아니다</div></div><div class="row hold" onclick="show('R26BK01636322')"><div class="rname">제23회 익산 천만송이 국화축제 행사장 공간조성 및 야간경관 조명 설치 운영 용역</div><div class="rmeta">전북특별자치도 익산시 (농업기술센터 기술보급과 화훼작물계) · 1.8억 (VAT 포함) · 마감 2026-08-06 16:00 (D-19)</div><div class="rwhy">★ 본질이 축제 행사장 시설·조명 설치·운영 대행 — 대형 천막구조물·트러스·컨테이너 임차·제작·설치와 17일 운영·철거·원상복구가 과업의 실체. 팀의 &#x27;행사대행 타깃 제외&#x27; 방침에 정면 배치</div></div><div class="row hold" onclick="show('R26BK01636967')"><div class="rname">신장2동 도시재생뉴딜사업 지역역량강화 용역(5차)</div><div class="rmeta">경기도 평택시 스마트도시과 (도시재생2팀) · 1.6억 (VAT 포함) · 마감 2026-08-06 10:00 (D-19)</div><div class="rwhy">과업 본질이 주민역량강화·협동조합 컨설팅·자립모델 매뉴얼·프로그램 운영·성과공유회 등 &#x27;계획·운영·컨설팅형 학술연구용역&#x27;으로, 우리 주력인 공간연출·전시·실감콘텐츠·서비스디자인과 정합성이 낮음</div></div><div class="row hold" onclick="show('R26BK01637890')"><div class="rname">[재공고]구미시 도시재생전략계획(2026~2035년) 수립 용역</div><div class="rmeta">경상북도 구미시 건축디자인과 (도시재생1팀) · 1억원 (VAT 포함) · 마감 2026-07-27 16:00 (D-9)</div><div class="rwhy">★ 참가자격 자체가 도시계획 엔지니어링사(3583)·기술사사무소(도시계획 1351)·건축사사무소(4817) 면허 필수 — 시그마애드(호진팀)는 해당 면허 미보유로 단독 입찰이 원천 불가</div></div><div class="row hold" onclick="show('R26BK01628861')"><div class="rname">용봉패션의거리 거리조명(가로등주 취부형 경관조명 설치사업)</div><div class="rmeta">용봉패션의거리 문화관광형시장 육성사업단 · 75,000,000원 (VAT 포함) / 추정가격 약 6,818만원 · 마감 2026-07-29 17:00 (D-11)</div><div class="rwhy">자격요건이 전기공사업 면허 + LED경관조명 직접생산확인증명서(2품목) + KS C 7713 인증 + 제조·설치 실적으로, 사실상 조명 제조·전기시공 전문업체 전용 공고 — 디자인 제안사(우리)는 입찰 진입선 자체를 넘기 어려움</div></div><div class="row hold" onclick="show('R26BK01636885')"><div class="rname">제31회 부산국제영화제 티켓 카탈로그 디자인 및 인쇄 용역</div><div class="rmeta">(사)부산국제영화제 · 7,000만 (VAT 포함) / 추정가격 6,363만 · 마감 2026-07-27 16:00 (D-9)</div><div class="rwhy">부산 지역 + BIFF라는 상징성 높은 레퍼런스이고 상영작 소개·시간표·광고 편집은 편집디자인 역량에 부합 — 단독 수주보다 &#x27;레퍼런스 확보&#x27; 관점의 가치는 존재</div></div>
+ <div style="margin-top:26px;font-size:11px;color:var(--muted);line-height:1.7">
+  판정은 RFP 원문 기반 분석 의견입니다. 팩트(배점·자격·일정)는 제안요청서에서 추출, 판정은 시그마애드 공공디자인·공간연출 역량 기준. 최종 결정 전 원문 대조 권장.</div>
+</div>
+<div class="rep" id="rep-R26BK01632179" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>구석기전망대 공간연출 및 실감형 체험 콘텐츠 조성 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01632179</b><br>기초금액 <b>4.3억 (VAT 포함)</b><br>마감 <b>2026-08-05 10:00 (D-18)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict go">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">적극 검토</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>충남 공주시 문화유산과 (석장리박물관팀 · 041-840-8926)</td></tr><tr><th>예산</th><td>430,000,000원 VAT 포함 / 추정가격 약 3.9억</td></tr><tr><th>계약방식</th><td>협상에 의한 계약 (제한총액, 긴급공고)</td></tr><tr><th>과업기간</th><td>착수일 ~ 2026. 12. 15. (하자보수 2년)</td></tr><tr><th>위치</th><td>충남 공주시 석장리동 129 일원 (석장리 구석기 유적지)</td></tr><tr><th>대상공간</th><td>야외광장 208.6 · 카페 152.9 · 브릿지테라스 197.6 · 전망대 107.3㎡</td></tr><tr><th>공동수급</th><td>공동이행·분담이행 가능 (분담비율 실적 인정)</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">구석기전망대 실내·외 4개 공간을 &#x27;구석기 문화 + 공원 경관&#x27;이 조화된 하나의 체험 공간으로 연출하는 과업. 단순 전시물 설치가 아니라 공간연출 설계 → 전시물·시설물 제작·설치 → 실감형 디지털 체험콘텐츠 개발까지 3축 통합. RFP가 명시한 핵심 목적은 &#x27;관람객 체류시간 연장&#x27;과 상징성·활용도 제고.</div>
+     <ul style="margin-top:8px"><li>공간 연출 설계 및 구축 (야외광장·카페·브릿지테라스·전망대 4개 존 통합)</li><li>전시물 및 시설물 제작·설치 (야외 전시물·상징조형물·경관조성 포함)</li><li>실감형 디지털 체험 콘텐츠 개발 (관람객 참여·체류 유도형)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정성(70)</td><td>사업의 이해 — 목적·내용 이해도, 추진방향 창의성, RFP 부합성</td><td class="pt mono">15</td></tr><tr class="hi"><td>정성(70)</td><td>공간구성계획 — 구성 창의성·효율성, 전시물 배치·동선, 색채구성, 전시매체</td><td class="pt mono">20</td></tr><tr class="hi"><td>정성(70)</td><td>기획 및 연출 — 연출 창의성·차별성, 기법 다양성, 주제 조화, 최신 제작기술 활용</td><td class="pt mono">20</td></tr><tr class=""><td>정성(70)</td><td>관리 및 운영계획 — 공정·수행방법, 사후관리, 시험운영·교육·기술이전</td><td class="pt mono">15</td></tr><tr class=""><td>정량(20)</td><td>수행실적 6 · 경영상태 6 · 기술인력 6 · 신인도 2</td><td class="pt mono">20</td></tr><tr class=""><td>가격(10)</td><td>입찰가격 평정산식</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 정성 70점 중 공간구성 20 + 기획·연출 20 = 40점이 당락을 가른다. 도면·동선 시뮬레이션·색채계획·실감 시나리오로 &#x27;보여주는&#x27; 싸움. 커트라인 70점(협상적격).</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>나라장터 입찰참가자격 등록 필수</li><li>정량 실적(6점 만점): 최근 5년 단일 2억원+ 유사사업 4건 이상 — 박물관·미술관·과학관·체험관 실내외 전시공간/전시물/실감콘텐츠 설계·제작·설치. 준공 실적만 인정(기성 불인정)</li><li>PM·기술인력 전문성, 기업신용등급 증빙</li><li>공동수급 시 분담비율 2억+ 이상만 실적 인정</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>제안서 접수 마감</td><td class='mono'>2026-08-05 10:00</td></tr><tr><td>용역 종료</td><td class='mono'>2026-12-15</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>태종대 서비스디자인·웨이파인딩·공간연출·실감콘텐츠와 판박이 역량 — 우리 검증된 주력 영역</li><li>정성 승부처(공간구성20+기획연출40)가 정확히 우리 강점 구간. 도면·동선·실감 시나리오로 차별화 가능</li><li>예산 4.3억으로 규모 적정, 협상계약이라 가격보다 기술(90점)이 압도적 — 제안서 품질로 이길 수 있는 판</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>정량 실적요건(5년·단일 2억+ 유사 4건)을 수행사가 충족하는지 착수 전 반드시 확인 — 미충족 시 정성 만점도 무의미</li><li>마감 8/5까지 약 2.5주 — 공간연출 설계+전시물+실감콘텐츠 3축 도면·조감도 분량 큼</li><li>4개 존 현장 실측·조망 조건(브릿지테라스·전망대 경관 자산) 확인 필요</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서(HWPX, 과업지시서 포함) 자동추출(49,942자) → 배점 역산 분석으로 생성됨. 공고번호 R26BK01632179. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01629281" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>2026년 수원화성박물관 특별기획전 전시디자인 및 설치용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01629281</b><br>기초금액 <b>1.15억 (VAT 포함)</b><br>마감 <b>2026-07-24 16:00 (D-6)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict go">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">적극 검토</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>수원시박물관사업소 수원화성박물관 (학예팀 김세영 · 031-5191-4219 / 계약 회계과 계약2팀 류한올 · 031-5191-3032)</td></tr><tr><th>예산</th><td>115,000,000원 VAT 포함 / 추정가격 104,545,455원</td></tr><tr><th>계약방식</th><td>경쟁입찰, 협상에 의한 계약 (기술 80 + 가격 20)</td></tr><tr><th>과업기간</th><td>계약일 ~ 2026. 12. 23. (철거·원상복구 포함) / 실시설계 착수일부터 20일</td></tr><tr><th>위치</th><td>수원화성박물관 1층 기획전시실</td></tr><tr><th>전시명</th><td>수원화성 완공 230주년 기념 특별기획전 &lt;수원화성 축성의 주인공들&gt;(가칭)</td></tr><tr><th>전시기간</th><td>2026. 9. 30.(수) 개막 ~ 2026. 12. 13.(일) / 설치완료 9. 29.(화)</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">정조대왕과 백성이 함께 이룬 수원화성 축성 230주년을 기념하는 실물유물 중심 특별기획전(도입~마무리 6개 존)의 전시디자인·공간연출·제작·설치를 총괄하는 과업. 전시공간 실시설계, 가벽체·도장·진열장(제작장)·유물받침대, 전시그래픽(패널·설명카드·사인물), 전시영상·모형, 포토존·체험물, 전시조명 연출, 철거·원상복구까지 전시연출 전 공정을 포함. 발주처가 요구하는 핵심은 &#x27;지정문화유산 초상·팔달문 부재 등 우수 유물의 가치 부각&#x27;과 &#x27;독창적 디자인·최신 기법 반영&#x27;. ★박물관 특별기획전 전시디자인·설치는 시그마애드(호진팀) 주력인 전시디자인·공간연출과 정면으로 직결되는 과업.</div>
+     <ul style="margin-top:8px"><li>전시공간 조성 및 전시연출 실시설계 (4대보험·안전관리비 내역 포함, 세부도면 작성)</li><li>전시그래픽 제작 설치 (전시개요·설명 패널, 설명카드, 이미지 패널, 사인물)</li><li>가벽체·도장·설치(내·외부) 및 철거·원상복구 (친환경자재·방염벽지)</li><li>전시 진열장(제작장)·유물받침대·특수받침대 제작 설치</li><li>전시매체 제작·연출 (전시영상 프로젝터·모니터·디지털액자, 모형, 포토존·체험물)</li><li>전시조명 연출 (박물관 보유 조명 레일 활용 + 신규 LED 조명 납품, 예비품 5%)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class="hi"><td>정성(60)</td><td>사업수행계획 — 사업목표 구체성·이해도·RFP 일치성(10) + 추진방법·수행일정 타당성·업무구성 체계성·운영인력 우수성(10)</td><td class="pt mono">20</td></tr><tr class="hi"><td>정성(60)</td><td>기술·지식능력 — 전시디자인·연출기법 구체성·창의성(10) + 전시유물 이해 기반 공간구성·표현 연계 적정성(10) + 전시영상 첨단기술 활용 적절성·우수성(10)</td><td class="pt mono">30</td></tr><tr class=""><td>정성(60)</td><td>지원기술·사후관리 — 유지보수 방안 적절성</td><td class="pt mono">5</td></tr><tr class=""><td>정성(60)</td><td>기타 — 사업수행 공정·수행방법 타당성</td><td class="pt mono">5</td></tr><tr class=""><td>정량(20)</td><td>참여인력 6(6명↑ 만점) · 수행실적 6 · 경영상태 6 · 신인도 2</td><td class="pt mono">20</td></tr><tr class=""><td>가격(20)</td><td>입찰가격 평점산식 (예정가 80% 이상 기준)</td><td class="pt mono">20</td></tr></tbody></table>
+   <div class="note">★ 정성 60점 중 기술·지식능력 30 + 사업수행계획 20 = 50점이 당락을 가른다. 전시디자인·연출기법 창의성, 유물 기반 공간구성, 전시영상 첨단기술 — 정확히 우리 주력 구간. 도면·조감도·연출 시나리오·영상 콘티로 &#x27;보여주는&#x27; 싸움. PPT 발표 15~20분. 커트라인 총점 70점(협상적격), 평가위원 7인·최고최저 제외 산술평균.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>「지방계약법 시행령」 제13조·시행규칙 제14조 참가자격 보유자 (경쟁입찰)</li><li>「산업디자인진흥법」 제9조 산업디자인전문회사(환경디자인 또는 환경디자인 포함 종합디자인분야) 신고 업체 — 필수 게이트</li><li>중소기업확인서 소지 (중소기업기본법 제2조 중소기업자 또는 소상공인기본법 소상공인)</li><li>직접생산확인증명서 소지 — 전시홍보관설치 및 디자인서비스(세부품명번호 7215409902) — 미보유 시 입찰 불가</li><li>정량 수행실적(6점 만점): 최근 3년 이내 박물관·미술관·과학관·기념관·전시관 등 전시연출·기획·시설 실적, 건당 4천만원(VAT 포함) 이상 5건 이상. 사립기관 실적은 실적증명서+계약서+세금계산서 필요</li><li>참여인력 6점 만점 조건: 공고일 기준 2개월 이상 재직 인력 6명 이상 (경력·재직증명서 첨부)</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>제안서 접수 마감</td><td class='mono'>2026-07-24 16:00</td></tr><tr><td>입찰공고 / 제안서 평가</td><td class='mono'>2026년 7월 중 (PPT 발표 15~20분)</td></tr><tr><td>실시설계</td><td class='mono'>착수일부터 20일</td></tr><tr><td>전시장 설치 완료</td><td class='mono'>2026-09-29</td></tr><tr><td>전시 개막 ~ 종료</td><td class='mono'>2026-09-30 ~ 2026-12-13</td></tr><tr><td>철거·원상복구 / 계약 종료</td><td class='mono'>전시종료 후 7일 이내 / 2026-12-23</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>박물관 특별기획전 전시디자인·공간연출·제작·설치는 시그마애드(호진팀) 주력 그 자체 — 태종대·부산디자인클러스터·전시디자인 실적과 직결되는 판박이 과업</li><li>협상계약(기술 80 vs 가격 20)이라 제안서 품질로 이기는 구조. 승부처인 정성 50점(기술지식 30+수행계획 20)이 우리 강점 구간과 정확히 일치</li><li>유물 기반 스토리텔링·전시영상 첨단기술·포토존/체험 연출 등 우리가 차별화할 요소가 배점에 명시 — 도면·조감도·연출 시나리오로 격차 벌릴 수 있음</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>일정 리스크 큼: 마감 7/24(D-6) → 계약 후 실시설계 20일 + 공장제작 + 설치완료 9/29·개막 9/30이 고정. 특별전 특성상 개막일 지연 불가, 착수~설치 구간이 매우 타이트</li><li>자격 게이트 3중(산업디자인전문회사 신고 + 중소기업확인서 + 직접생산확인증명서 7215409902) — 미보유 시 응찰 불가. 정량 실적요건(최근3년·건당 4천만원+ 5건) 충족 여부 착수 전 반드시 확인</li><li>예산 1.15억으로 규모가 작아 수익성·투입 대비 검토 필요. 입찰등록은 수원시청 본관1층 방문접수만 가능(우편·인터넷 불가)</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서·과업지시서(HWPX) 자동추출 → 배점 역산 분석으로 생성됨. 공고번호 R26BK01629281. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01628453" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>규장각한국학연구원 전시실 실감형 콘텐츠 제작 및 설치</h1></div>
+   <div class="meta">공고번호 <b>R26BK01628453</b><br>기초금액 <b>3억 (VAT 포함)</b><br>마감 <b>2026-07-27 14:00 (D-9)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict cond">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">조건부 검토</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>서울대학교 규장각한국학연구원 학예연구부 (02-880-8766) / 조달 담당 남유진 02-880-5504</td></tr><tr><th>예산</th><td>300,000,000원 VAT 포함 / 추정가격 약 272,727,273원</td></tr><tr><th>계약방식</th><td>협상에 의한 계약 (기술평가 90% + 가격평가 10%)</td></tr><tr><th>과업기간</th><td>계약 체결일 ~ 2026. 11. 27. (하자보증 준공 후 1년)</td></tr><tr><th>위치</th><td>서울대 규장각한국학연구원 본관 지하 1층 전시실</td></tr><tr><th>대상공간</th><td>전이공간 18㎡ · 상설전시실 · 전시실 입구(대형 LED 31.5㎡) · 기획전시실 입구</td></tr><tr><th>공동수급</th><td>공동이행방식만 허용(2개사 이하, 최소지분율 10%+) / 하도급 불허</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">규장각 소장 기록문화유산(동궐도·대동여지도·조선왕조실록 등)을 소재로 본관 지하 1층 전시실에 디지털 영상 콘텐츠 5종 6건을 제작하고 이를 구현할 영상기기·시스템을 설치하는 실감형 콘텐츠 과업. 빔프로젝터 프로젝션(동궐도 3D모델링·전통회화 애니메이션), 대형 LED 패널(대동여지도 실물 재현 4.5×7m), LED 미디어(실록의 여정·무빙포스터) 등 매체별 연출과 하드웨어 통합 구축이 동시에 요구된다. RFP 명시 목적은 관람객 전시 체험 만족도 제고와 규장각 브랜드 경쟁력 강화.</div>
+     <ul style="margin-top:8px"><li>디지털 영상 콘텐츠 5종 6건 기획·제작 (동궐도 3D모델링·전통회화 모션, 규장각 동선 실감영상, 고지도 실록 이동경로, 대동여지도 실물 재현, 전시안내 무빙포스터)</li><li>영상 서비스 시스템 구축 — 빔프로젝터·LED 패널·LED 모니터·음향·운영PC/서버·원격제어 스케줄러 일괄공급 설치</li><li>설치 환경 조성(전기·통신·조명 인프라, 기존 설치물 철거·구조개선, 천창 직사광 대책), 시범운영(2주 이상)·유지보수·철거</li><li>영어 번역·원어민 감수·더빙/자막, 온라인 콘텐츠화 및 사후관리, 운영 매뉴얼·교육</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>사업수행능력(10·정량)</td><td>사업수행실적(3년 실적누계 4) · 기술능력 인력확보 3 · 경영상태 신용등급 3</td><td class="pt mono">10</td></tr><tr class=""><td>기술제안서(80·정성)</td><td>사업의 이해 — 사업목적·내용 이해도 5, 제안요청서 부합성·실현가능성 5</td><td class="pt mono">10</td></tr><tr class="hi"><td>기술제안서(80·정성)</td><td>콘텐츠 기획 및 제작 — 기획 창의성·완성도 10, 제작 사업계획·기술력 10, 조직·인력(자문 포함) 5, 문화자원 활용 기획 5</td><td class="pt mono">30</td></tr><tr class="hi"><td>기술제안서(80·정성)</td><td>콘텐츠 개발 및 기술 — 기술적용 방안 구체성 10, 시스템 기술 우수성·내구성·신뢰도 10, 운용시스템·환경조성 5</td><td class="pt mono">25</td></tr><tr class=""><td>기술제안서(80·정성)</td><td>제작·설치 및 향후 관리·운영 — 세부일정·조직·업무분장 7, 시범운영·관리유지운영 방안 8</td><td class="pt mono">15</td></tr><tr class=""><td>가격(10)</td><td>제안가격 평가</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 기술 90점(정량 10 + 정성 80) vs 가격 10점 — 제안서로 이기는 판. 정성 80점 중 콘텐츠 기획·제작 30 + 개발·기술 25 = 55점이 당락을 가른다. 커트라인: 기술능력평가 배점(90)의 85%(=76.5점) 미만은 협상대상 제외.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>나라장터(G2B) 입찰참가자격 등록 필수 + 조달청 입찰참가자격등록증 소지(전자입찰)</li><li>소프트웨어 진흥법 제24조 소프트웨어사업자 신고 — 디지털콘텐츠 개발서비스 사업(업종코드 1469) 등록 업체 (관문)</li><li>SW분야 과업금액 20억원 미만 사업 — 대기업·중견기업 SW사업자 참여 불가(중소 SW사업자만)</li><li>공동수급 시 공동이행방식만, 2개사 이하·구성원별 최소지분 10%+ / 하도급 불허(자체 수행 원칙)</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>질의 접수(서면·이메일, 업체별 1회)</td><td class='mono'>finelp@snu.ac.kr</td></tr><tr><td>제안서 제출 마감</td><td class='mono'>2026-07-27 14:00</td></tr><tr><td>사업기간 종료</td><td class='mono'>2026-11-27</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>전시실 실감형 영상콘텐츠 5종 6건 제작·설치 = 전시디자인+실감콘텐츠 주력과 직결. 동궐도 3D모델링·전통회화 모션, 프로젝션·LED 미디어 연출은 태종대·부산디자인클러스터에서 검증한 강점 구간</li><li>협상계약(기술 90 vs 가격 10) + 정성 승부처(콘텐츠 기획·제작 30 + 개발·기술 25 = 55점)가 정확히 우리 기획·연출 역량 구간 — 스토리라인·연출 시나리오·문화자원 활용안으로 차별화 가능</li><li>규장각 국가 기록유산 브랜드 레퍼런스 가치가 높고, 예산 3억·기간 계약~11/27로 규모 적정</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>입찰자격 관문: 소프트웨어사업자 신고(디지털콘텐츠 개발서비스, 업종코드 1469) 등록 + 중소 SW사업자 요건 충족 여부를 착수 전 반드시 확인 — 미등록·자격 미달 시 제안 자체 불가</li><li>하드웨어 통합 비중이 큼 — 대형 LED 패널(4.5×7m·픽셀피치 2mm·4K), 7,000안시 Short-Throw 프로젝터 2대+, 운영PC/서버·원격 스케줄러 등 시스템 구축이 콘텐츠와 동등 비중. 하도급 불허라 HW 자체수행 또는 공동수급 파트너 체계 필요</li><li>마감 D-9(7/27 14:00), 현장설명회 없음 — 지하1층 전시실 실측·천창 직사광 대책·기존 설치물 철거 구조개선 등 현장조건 반영과 제안서 제작 일정이 촉박</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서(HWP, 과업지시서 포함) 자동추출 → 배점표·과업범위 분석으로 생성됨. 공고번호 R26BK01628453. 최종 판단 전 원문 및 입찰공고서 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01625303" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>강정마을 한울타리센터 역사체험관 전시콘텐츠 제작·설치 및 공간구성 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01625303</b><br>기초금액 <b>2.5억 (VAT 포함)</b><br>마감 <b>2026-08-04 16:00 (D-17)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict cond">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">조건부 검토</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>제주특별자치도 서귀포시 시민소통지원실 (담당 서종범 · 064-760-2086)</td></tr><tr><th>예산</th><td>250,000,000원 VAT 포함 / 추정가격 약 2.27억 (콘텐츠 설계·제작·설치·공간구성 등 일체 포함)</td></tr><tr><th>계약방식</th><td>제한경쟁입찰 · 협상에 의한 계약 (지방계약법 시행령 제43조)</td></tr><tr><th>과업기간</th><td>착수일 ~ 2026. 12. 15. (하자보수 2년 이상)</td></tr><tr><th>위치</th><td>서귀포시 강정동 2929-1 외 5필지 · 강정마을 한울타리센터 역사체험관</td></tr><tr><th>대상공간</th><td>역사체험관 총 348.15㎡ (전시실 201.58 · 공용공간 91.70 · 치유프로그램실 23.01 · 수유실 8.46)</td></tr><tr><th>공동수급</th><td>분담이행방식만 허용 · 대표사 포함 2개 업체 이내 (지역제한 적용)</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">강정마을(민군복합항 건설 갈등·봉합·공동체 회복의 서사)을 담은 역사체험관 전시콘텐츠를 기획·설계·제작·설치하고 치유프로그램실 등 공용부 인테리어까지 공간을 연출하는 과업. 역사자료 조사·주민구술채록 → 전시기획·실시설계 → 전시물·패널·영상물·모형 제작·설치 → 스토리텔링 동선·인테리어 마감까지 전시디자인·공간연출 전 과정을 포괄한다. 과업 성격은 우리 주력(태종대·부산디자인클러스터·전시디자인·공간연출)과 정확히 일치. 단, 참가자격에 &#x27;주된 영업소가 제주특별자치도 내&#x27; 지역제한이 걸려 있어 참여 구조가 관건.</div>
+     <ul style="margin-top:8px"><li>역사자료 조사·주민구술채록·추진위 자문 기반 전시기획 및 콘텐츠 개발</li><li>전시 실시설계 (평면도·입면도·전개도·전시물 상세도, 음향·조명·색조 부대연출 계획)</li><li>전시물·설명패널·영상물·표본/모형·사인물·홍보물(리플릿·배너) 디자인·제작·설치</li><li>스토리라인 기반 전시 공간구성 및 내부 인테리어 디자인·마감 (구조물·거치대 포함)</li><li>치유프로그램실 등 공용부분 인테리어 환경 조성 및 안전 동선 계획</li><li>성과품(도면·내역서·시방서·공정표 등) 납품 및 하자보수·유지관리 계획(2년 이상)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정성(70)</td><td>사업수행계획 — 사업목표·내용 이해도 및 역사체험관 조성목적 부합성</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>사업수행계획 — 마을 역사·정체성 반영 정도, 계획의 적정성·실현가능성</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>구체적 기술능력 — 제안 설계내용의 시공 가능성(구체화 추진능력)</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(70)</td><td>구체적 기술능력 — 전시물 배치 및 공간구성의 적정성</td><td class="pt mono">15</td></tr><tr class="hi"><td>정성(70)</td><td>구체적 기술능력 — 콘텐츠 구성 적정성(스토리 전개 및 내부 인테리어)</td><td class="pt mono">15</td></tr><tr class=""><td>정성(70)</td><td>안전성 및 사후관리 — 내구성·안정성, 유지보수 등 사후관리 용이성</td><td class="pt mono">10</td></tr><tr class=""><td>정량(20)</td><td>기술인력 6 · 유사실적 6 · 경영상태 5 · 신인도 3</td><td class="pt mono">20</td></tr><tr class=""><td>가격(10)</td><td>지방계약 협상에 의한 계약 입찰가격 평정산식</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 정성 70점 중 &#x27;시공화 등 구체적 기술능력&#x27; 40점(시공가능성10+전시물배치·공간구성15+콘텐츠구성15)이 당락을 가른다. 그중에서도 공간구성 15 + 스토리·인테리어 15 = 30점이 핵심 승부처로, 도면·동선·조감도로 &#x27;보여주는&#x27; 싸움. 커트라인 종합 70점(협상적격). 단 발표 시 동영상·음향 사용 불가 → 정지 이미지·도면·조감도만으로 15분 설명해야 함.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>★ 지역제한: 공고일 전일 기준 주된 영업소가 제주특별자치도 내에 있어야 하며 계약체결일까지 유지 (부산 소재 단독 참여 불가)</li><li>중소기업확인서 소지</li><li>직접생산확인증명서: 전시홍보관설치및디자인서비스(7215409902) 또는 전시부스설치및디자인서비스(7215409901) 또는 실물모형및전시물(6010989901)</li><li>실내건축공사업 면허(건설산업기본법, 업종코드 0006)</li><li>산업디자인전문회사 (환경디자인 4442 / 종합디자인 4444 / 시각디자인 4440 중 1)</li><li>공동수급은 분담이행방식만·대표 포함 2개사 이내, 정량 실적은 5년간 유사(박물관·기념관·체험관 등) 디자인·설계·제작·설치 준공실적 금액 합산(2.5억+ 만점, 비상설·기획전시 제외)</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>제안서 제출 마감</td><td class='mono'>2026-08-04 16:00</td></tr><tr><td>제안서 평가·발표</td><td class='mono'>7~8월 중 (발표 15분+질의 15분, 동영상·음향 불가)</td></tr><tr><td>협상 및 계약체결</td><td class='mono'>8월 중 (통보 후 10일 이내)</td></tr><tr><td>설계·제작·설치</td><td class='mono'>8~11월</td></tr><tr><td>설치완료·공간연출</td><td class='mono'>2026-12-15 기한 내 납품</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>과업 성격(역사체험관 전시콘텐츠 기획·제작·설치+스토리텔링 공간연출+공용부 인테리어)이 우리 주력(태종대·전시디자인·공간연출)과 정면으로 일치</li><li>정성 70점 비중이 높은 협상계약이라 가격보다 제안서 품질(공간구성15+스토리·인테리어15+시공가능성10)로 이기는 판 — 우리 강점 구간에 배점이 집중</li><li>&#x27;갈등·봉합·공동체 회복&#x27; 서사는 스토리텔링·공간연출로 풀어내기 좋은 주제로, 창의적 연출 차별화 여지가 큼</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>★ 지역제한이 결정적 장벽 — 주된 영업소가 제주도 내여야 하므로 부산 기반 단독 참여 불가. 제주 소재 유자격 파트너와의 분담이행 공동수급이 아니면 응찰 자체가 어려움(각 자격요건 충족 필요)</li><li>발표 시 동영상·음향 사용 불가 → 실감콘텐츠·영상 연출을 정지 이미지·조감도·도면으로만 설득해야 하며 발표 15분 제약</li><li>정량 실적요건(5년 유사 준공실적, 2.5억 만점·비상설 제외)과 실내건축공사업 면허·직접생산확인 등 자격을 우리 또는 파트너가 충족하는지 착수 전 확인 필수 — 미충족 시 정성 만점도 무의미</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서(HWPX, 과업지시서 포함) 자동추출 → 배점 역산 분석으로 생성됨. 공고번호 R26BK01625303. 예산·자격·지역제한 등 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01631289" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>「제주삼다수X에코랜드」지역기반 상설체험전시관 운영 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01631289</b><br>기초금액 <b>1.5억 (VAT 포함)</b><br>마감 <b>2026-08-05 16:00 (D-18)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict cond">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">조건부 검토</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>제주특별자치도개발공사 · 구매계약팀 064-780-3414 / 과업·제안 마케팅팀 064-780-3534</td></tr><tr><th>예산</th><td>149,987,000원 VAT·제반비용 포함 / 추정가격 약 136,351,818원</td></tr><tr><th>계약방식</th><td>제한경쟁입찰(중소기업)·총액계약 / 낙찰자결정 협상에 의한 계약</td></tr><tr><th>과업기간</th><td>계약체결일 ~ 2026. 12. 31. (상시운영 종료일 = 사업 종료일)</td></tr><tr><th>위치</th><td>제주 에코랜드(교래리 곶자왈) 내 실내 공간(도면) + 실외 공간 일부</td></tr><tr><th>대상공간</th><td>상시 전시공간 + 테마 전시공간(연 1회, 7 또는 9월 10~20일) + 실외 조형물</td></tr><tr><th>공동수급</th><td>공동수급·일괄 재용역(재하도급) 모두 불허 — 단독 수행 필수</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">명칭은 &#x27;운영 용역&#x27;이나 과업 실체는 하이브리드. 전반부는 우리 일 — 제주지하수·삼다수·곶자왈을 주제로 한 전시 콘셉트·콘텐츠 기획, 공간디자인, 상시+테마 전시물·조형물의 제작·설치·연출(조명·그래픽·안내체계). 후반부는 우리 일 아님 — 계약~2026.12.31 상시 운영, 현장 관리·운영 인력 채용·교육·배치·근태/복무관리, 테마전시 2인 이상 상주, 홍보·모객·바이럴, 안전관리, 철거·원상복구. 즉 제작(전시디자인·공간연출)과 장기 운영·인력 대행이 한 계약에 묶였고, 예산 1.5억 안에 둘을 동시에 소화해야 함. 계약 후 4주 이내 상시 공간 조성·전시물 설치 완료 요구.</div>
+     <ul style="margin-top:8px"><li>전시 콘셉트·콘텐츠 기획 및 디자인 (삼다수·곶자왈·제주지하수 주제, 안내문구·그래픽·시각물, 시안·제작도서·연출계획안) — 우리 일</li><li>상시+테마 전시공간 구성·전시물/구조물/조형물/사인물 제작·설치, 조명·그래픽·안내체계 현장 연출, 실외 조형물 제작·설치 — 우리 일</li><li>상시 운영(~2026.12.31)·현장 관리/운영 인력 채용·교육·배치·근태 복무관리·운영일지 작성 — 운영·인력 대행(우리 일 아님)</li><li>테마 전시 운영(연 1회 10~20일, 2인 이상 상주), 현장 응대·질서유지·프로그램 진행 — 운영 대행(우리 일 아님)</li><li>운영 활성화(홍보물 기획·제작, 현장 커뮤니케이션, 고객참여 프로그램, 설문·SNS 편집), 안전관리·보험, 사업종료 후 철거·원상복구, 월간·분기·최종 보고</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>기술(90)-정량(20)</td><td>경영상태 6(신용등급) · 핵심인력 보유 6(팝업/홍보관/축제/전시부스 운영 2년+ 경력) · 용역근로자보호 3 · 사회적책임 3 · 산업재해율 2</td><td class="pt mono">20</td></tr><tr class=""><td>기술(90)-정성(70)</td><td>사업 이해도·전문성·기획 적절성 — 사업목적·설계방향 연계성, 참여인력 구성, 전시 스토리라인·공간구성 기획</td><td class="pt mono">10</td></tr><tr class="hi"><td>기술(90)-정성(70)</td><td>전시콘텐츠 적절성 — 전시물 주제 연계성, 독립성·보완성·창의성, 주제 전달력</td><td class="pt mono">20</td></tr><tr class="hi"><td>기술(90)-정성(70)</td><td>사업관리 계획의 적정성 — 단계별 일정, 상시 전시공간 관리계획, 테마전시 관리계획, 홍보·바이럴 확산 계획</td><td class="pt mono">20</td></tr><tr class=""><td>기술(90)-정성(70)</td><td>안전관리 계획 — 동선·구조물·전시물 안전관리, 대응계획, 추가 아이디어</td><td class="pt mono">10</td></tr><tr class=""><td>기술(90)-정성(70)</td><td>사후관리 및 추가 제안 — 운영결과 분석·개선(PDCA), 운영 관련 추가 아이디어</td><td class="pt mono">10</td></tr><tr class=""><td>가격(10)</td><td>입찰가격 평점산식(지자체 협상계약 기준 별표1 주2)</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 정성 70점의 승부처가 둘로 쪼개짐 — &#x27;전시콘텐츠 적절성 20&#x27;은 우리 제작·전시디자인 강점 구간이지만, &#x27;사업관리 계획 20&#x27;은 상시운영·테마관리·인력·바이럴 등 운영 역량 평가로 우리 DNA 밖. 즉 제안서 절반은 제작 크리에이티브, 절반은 운영·관리 수행능력을 요구. 협상적격 커트라인 70점, 정성은 최고·최저 위원 제외 후 산술평균, 발표 비대면(ZOOM) 20분+Q&amp;A 10분.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>나라장터 등록업종 [실내건축공사업 4990] 입찰참가자격 등록 필수(마감 전일까지) — 미보유 시 입찰 불가</li><li>직접생산확인증명서 중 1+ 소지: 전시홍보관 설치 및 디자인(7215409902) / 전시회 기획·대행(8014198801) / 기타행사기획·대행(8014199001)</li><li>중소기업(중·소기업 또는 소상공인) 확인서 소지, 부정당업자 제한 비해당</li><li>공동수급 불허 · 제3자 일괄 재용역(재하도급) 불허 — 자격·실적 단독 충족 필수</li><li>핵심인력 정량점: 팝업스토어·홍보관·축제·전시부스 &#x27;운영&#x27; 2년+ 경력자 5명 이상이 만점(6점) — 제작이 아닌 &#x27;운영&#x27; 경력 기준</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰서(가격) 투찰 마감</td><td class='mono'>2026-08-05 16:00 (나라장터 전자투찰)</td></tr><tr><td>기술제안서 별도 제출</td><td class='mono'>지정 기한 내 우편·직접제출(구매계약팀) — 미제출 시 무효</td></tr><tr><td>제안서 발표(정성)</td><td class='mono'>공사 홈페이지 별도 공지 / 비대면 ZOOM, PM 발표 20분+Q&amp;A 10분</td></tr><tr><td>착수보고회</td><td class='mono'>계약체결 후 14일 이내 / 상시 공간 조성·설치 계약 후 4주 이내</td></tr><tr><td>테마 전시 운영</td><td class='mono'>2026년 7월 또는 9월 중 10~20일간 1회</td></tr><tr><td>사업 종료</td><td class='mono'>2026-12-31</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>전시 콘셉트·콘텐츠 기획, 공간디자인, 상시·테마 전시물 및 실외 조형물 제작·설치·연출(조명·그래픽·사인)은 태종대·전시디자인·공간연출 우리 검증 역량과 정확히 겹침</li><li>정성 배점 중 &#x27;전시콘텐츠 적절성 20점&#x27;은 우리 제작·크리에이티브가 확실히 우위를 점할 수 있는 구간 — 스토리라인·전시물 창의성으로 차별화 가능</li><li>협상에 의한 계약(기술 90 : 가격 10)이라 가격 저가경쟁이 아닌 제안 품질로 뒤집을 수 있는 판</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>과업의 절반이 계약~12/31 상시 운영·인력 채용/교육/배치/근태 복무관리·테마 상주·홍보 모객·철거로, 이는 우리가 하지 않는 순수 운영·인력 대행 — &#x27;사업관리 계획 20점&#x27;도 운영 역량을 물어 정성 승부처의 절반을 우리가 약한 영역에서 다툼</li><li>자격 장벽이 큼 — 실내건축공사업(4990) 등록 + 직접생산확인증명서 + 공동수급·재하도급 불허. 셋 중 하나라도 단독으로 못 갖추면 정성 만점도 무의미(입찰 원천 불가)</li><li>예산 1.5억(VAT·제반비 포함)으로 제작(공간·전시물·조형물)과 약 6개월 상시 운영·인력·보험·홍보·철거를 동시 소화 — 인건비가 제작비를 잠식해 제작 마진이 얇고, 계약 후 4주 내 조성 완료라는 촉박한 일정 리스크</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서·과업지시서(HWP) 원문 추출 → 배점·자격 역산 분석으로 생성됨. 공고번호 R26BK01631289. 예산·자격(실내건축공사업 4990 등록, 직접생산확인증명서)·일정은 원문·공고문 대조 후 최종 판단 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01633323" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>스마트팜 혁신밸리 체험·전시시설 조성사업 (협상에 의한 계약)</h1></div>
+   <div class="meta">공고번호 <b>R26BK01633323</b><br>기초금액 <b>4억원 (VAT 포함)</b><br>마감 <b>미정 — 공고 2026.7 · 제안서평가 2026.8 (공고문 상 접수마감 일시 별도 지정) / 생성일 D-미정</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>경북 상주시 스마트농업과 (담당 정민아 · 054-537-7280)</td></tr><tr><th>예산</th><td>400,000,000원 VAT 포함 / 추정가격 약 363,636,364원</td></tr><tr><th>계약방식</th><td>제한경쟁입찰 + 협상에 의한 계약 (지방계약법 시행령 제43조)</td></tr><tr><th>과업기간</th><td>착수일로부터 120일 (하자보수·보증 2년)</td></tr><tr><th>위치</th><td>경북 상주 스마트팜 혁신밸리 R&amp;D라운지·전시온실</td></tr><tr><th>대상공간</th><td>R&amp;D라운지 868㎡ · 전시온실 600㎡ (기존시설 리모델링)</td></tr><tr><th>지역제한</th><td>본점이 경상북도 또는 대구광역시 소재 업체 (핵심 참가장벽)</td></tr><tr><th>공동수급</th><td>공동이행·분담이행 가능 / 대표사는 실내건축공사업 보유 필수, 최소지분 5%</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">상주 스마트팜 혁신밸리 내 기존 R&amp;D라운지(868㎡)·전시온실(600㎡)을 리모델링해 스마트농업 홍보관·미디어아트존·포토존·데이터체험실·체험온실 등으로 조성하는 과업. 전시 콘텐츠 기획·미디어아트·인터랙티브·스토리텔링 동선 등 우리 주력(공간연출·전시디자인·실감콘텐츠) 영역이 과업의 상당 비중을 차지하나, 계약 성격은 &#x27;실시설계 성과품을 토대로 시설공사 완료까지&#x27; 수행하는 설계+시공 통합 발주다. 대표사에 실내건축공사업(4990) 면허를 강제하고 전기·통신·조명·구조물 설치·건축폐기물 처리까지 시공 책임을 포함한다. 즉 콘텐츠·연출은 우리 일이 맞지만, 원청은 전시디자인 회사가 아니라 실내건축 시공사가 되는 구조.</div>
+     <ul style="margin-top:8px"><li>공간별 조성계획·기획·실시설계 (홍보관·미디어아트존·포토존·데이터체험실·PPT존·체험온실) — 우리 영역</li><li>미디어·인터랙티브·스토리텔링 콘텐츠 기획·제작, 파종~수확 시각화, 다국어 안내 — 우리 영역</li><li>기존시설 리모델링 설계 + 전기·통신·조명 등 전시환경 구축·전시물 제작·설치 — 혼합</li><li>시공(안전기준·산업안전보건법·건축폐기물 처리 포함) 및 공사비 내역서 작성 — 시공사 영역(우리 일 아님)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정량(20)</td><td>유사사업 실적 — 최근 10년 유사시설 구축/콘텐츠 제작·설치 (단일 4억+ 10점, 3~4억 5점)</td><td class="pt mono">10</td></tr><tr class=""><td>정량(20)</td><td>참여인력 전문성 — 전시·체험·홍보·디자인 전문인력 (3인+ 10, 2인 7, 1인 5)</td><td class="pt mono">10</td></tr><tr class=""><td>정성(60)</td><td>사업 이해도 — 목적·취지 이해, 과업지시서 부합성</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(60)</td><td>콘텐츠 기획 및 창의성 — 전시·체험 콘텐츠 차별성·창의성, 디지털활용, 동선·스토리텔링, 스마트농업 연계</td><td class="pt mono">20</td></tr><tr class="hi"><td>정성(60)</td><td>사업수행능력 — 사업계획 구체성·실현성, 공간구성·설계 적정성, 공정·일정관리</td><td class="pt mono">15</td></tr><tr class=""><td>정성(60)</td><td>사업관리방안 — 추진일정·집행 합리성, 유지관리·사후관리, 인력최소화·운영효율</td><td class="pt mono">15</td></tr><tr class=""><td>가격(20)</td><td>입찰가격 평점산식 (예정가 80% 기준)</td><td class="pt mono">20</td></tr></tbody></table>
+   <div class="note">★ 기술 80점(정량20+정성60) : 가격 20점. 정성 60점 중 콘텐츠 기획·창의성(20)이 최대 배점이자 승부처로 정확히 우리 강점 구간이며, 사업수행능력(15)의 공간구성·설계 적정성까지 합치면 우리가 잘하는 판. 다만 정량 20점(유사실적·전문인력)은 대표 시공사의 실적으로 평가되고, 협상 커트라인은 종합 70점.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>본점 소재지가 경상북도 또는 대구광역시일 것 — 부산 기반 우리 팀은 원청 자격 미달 (분담보유 규정 없음)</li><li>대표사는 실내건축공사업(업종코드 4990) 보유 필수 — 전시디자인사가 아닌 실내건축 시공사가 원청</li><li>면허 3종(실내건축공사업 4990 · 산업디자인전문회사 환경디자인 4444 · 금속창호지붕건축물조립공사업 4991) — 공동수급 시 구성원 분담 보유 가능</li><li>나라장터(G2B) 입찰참가자격 등록, 공동수급 최소지분 5% 이상, 방문접수(우편·이메일 불가)</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰공고</td><td class='mono'>2026-07</td></tr><tr><td>제안서 평가</td><td class='mono'>2026-08</td></tr><tr><td>성과품 제출</td><td class='mono'>2026-08 ~ 12</td></tr><tr><td>과업기간</td><td class='mono'>착수일 +120일 (하자보수 2년)</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>콘텐츠 기획·미디어아트·공간연출·스토리텔링 동선 등 정성 승부처는 태종대·부산디자인클러스터에서 검증된 우리 주력과 정확히 일치</li><li>정성 배점(콘텐츠창의성20+사업수행능력15)이 크고 협상계약이라 제안서 품질로 이길 수 있는 판 자체는 매력적</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>★ 지역제한(경북/대구 본점)에 부산 기반 우리 팀이 걸려 단독·대표사 참가 자체가 불가 — 자격 미달이 결정적 장벽</li><li>대표사 실내건축공사업(4990) 강제 + 전기·통신·조명·시공·폐기물처리까지 포함된 설계+시공 통합 발주라 우리는 원청이 아닌 환경디자인(4444) 분담 하도 구성원으로만 참여 가능 → 주도권·수익성 제한</li><li>참여 시 경북/대구 소재 실내건축 시공사를 대표사로 세우는 공동수급 결성이 전제인데, 마감·현장(상주)·지역 파트너 확보 리드타임이 촉박</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 공고 R26BK01633323 제안요청서·과업지시서(HWPX) 원문 추출 후 배점·자격·과업범위 분석으로 생성됨. 예산·기간·배점·자격은 원문 수치 기준이며, 접수마감 일시는 공고문 별도 지정으로 미확정. 최종 판단 전 원문 및 지역·면허 요건 재확인 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01631069" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>안동시 도시재생 전략계획 및 활성화 수립 용역(협상)</h1></div>
+   <div class="meta">공고번호 <b>R26BK01631069</b><br>기초금액 <b>3.09억 (VAT 포함)</b><br>마감 <b>확인 필요 (공고 메타 clse 값 없음 — 원문 공고서에서 제안서 접수 마감일시 확인)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>경상북도 안동시 건축과 (담당 금보경 · 054-840-6136)</td></tr><tr><th>예산</th><td>309,290,000원 VAT 포함 / 추정가격 281,172,727원 (VAT 별도)</td></tr><tr><th>계약방식</th><td>제한경쟁입찰 · 협상에 의한 계약 (지계령 제43조)</td></tr><tr><th>과업기간</th><td>착수일로부터 540일 (18개월)</td></tr><tr><th>대상범위</th><td>공간: 안동시 도시지역 일원 / 시간: 기준 2026년~목표 2036년</td></tr><tr><th>과업성격</th><td>도시재생 전략계획 수립(정비) + 활성화계획 수립 + 국토부 공모제안서 작성</td></tr><tr><th>참가자격</th><td>학술연구용역(업종코드 1169) 등록 + 조달청 입찰참가자격 등록업체 (면허보완 공동도급 가능)</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">「도시재생 활성화 및 지원에 관한 특별법」 제12·13조에 근거해 안동시 도시재생 전략계획을 전면 재수립(정비)하고, 활성화지역 지정·활성화계획 수립·국토부 공모제안서 작성까지 수행하는 법정계획 수립 용역이다. 핵심 과업은 기초조사·쇠퇴진단(집계구/행정동 단위 복합쇠퇴지수)·활성화지역 지정·재원조달계획·추진체계·성과관리로, 도시계획 엔지니어링/학술연구기관 영역에 정확히 속한다. 공간연출·전시·실감콘텐츠 요소는 사실상 없으며, 참여기술자도 도시계획·건축·주거환경 기술사/박사 중심을 요구한다.</div>
+     <ul style="margin-top:8px"><li>2036 도시재생 전략계획 수립(정비): 기초조사(인문사회·산업경제·물리환경)·쇠퇴진단·비전/목표·재생권역 설정</li><li>도시재생활성화지역 지정·변경 (복합쇠퇴지수·주거취약지수, 혁신지구·지역특화재생 유형 구분)</li><li>활성화지역별 우선순위·연계방안 및 재원조달·예산집행계획(국·도비/지방비/민간투자) 수립</li><li>추진체계·도시재생지원센터 운영방안, 성과관리(모니터링)·평가지표 설정</li><li>도시재생 활성화계획(00지구) 수립 및 국토교통부 공모제안서 작성</li><li>주민공청회·지방의회 의견청취·지방도시재생위원회 심의 등 법정 행정절차 이행 (전문자문단 5인+·현장참여단 10인+ 운영)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정량(20)</td><td>기술인력 보유상태 — 사업총괄/분야별 책임기술자(도시계획) 자격·경력, 기술사·박사~초급 등급 절대평가</td><td class="pt mono">6</td></tr><tr class="hi"><td>정량(20)</td><td>수행경험(실적) — 최근 5년 준공한 &#x27;도시재생 전략계획/활성화계획 수립·변경&#x27; 유사실적. 건수 3.0(4건미만~10건+) + 금액 3.0(4억미만~10억+)</td><td class="pt mono">6</td></tr><tr class=""><td>정량(20)</td><td>신인도 — 입찰참가제한·업무정지 감점 (절대평가)</td><td class="pt mono">4</td></tr><tr class=""><td>정량(20)</td><td>경영상태 — 신용평가등급확인서 (AAA 4.0 ~ 미제출 0)</td><td class="pt mono">4</td></tr><tr class=""><td>정성(60)</td><td>과업의 이해 및 도시재생전략계획 목표제시 — 총괄책임자·업체 전문성, 상위/관련계획·법규 반영, 지역자원조사</td><td class="pt mono">10</td></tr><tr class=""><td>정성(60)</td><td>과업수행 추진체계 및 맞춤형 도시재생 추진방향 — 계획수립 방향, 조직구성·업무분장, 지역여건 진단</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(60)</td><td>목표달성을 위한 창의적 실현방안 제시 — 사업목표 합리성, 시행방안 독창성, 전략계획 변경전략·기본구상</td><td class="pt mono">10</td></tr><tr class=""><td>정성(60)</td><td>제안내용의 적절성 — 사업내용 구체성, 실천방안·단계별 목표 적절성 (지역특성 반영 수행방안)</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(60)</td><td>기술활용 및 경제성 — 지역자원·특성 반영 특성화, 주민역량강화·공동체 활성화, 지역경제·일자리 파급효과</td><td class="pt mono">10</td></tr><tr class=""><td>정성(60)</td><td>지역발전 및 지속가능성 — 지역 기여도, 사후관리 시스템, 지속가능성 평가·모니터링 계획</td><td class="pt mono">10</td></tr><tr class=""><td>가격(20)</td><td>입찰가격 평가 (배점비율 20%, 예규 제344호 산식)</td><td class="pt mono">20</td></tr></tbody></table>
+   <div class="note">★ 기술능력 80(정량20+정성60) + 가격20, 협상적격 커트라인 70점. 정성 60점은 6개 항목 균등 10점 배분이며 전부 &#x27;도시재생 계획수립&#x27; 역량(쇠퇴진단·활성화지역 지정·재원조달·성과관리) 평가라 공간연출·전시·경관 강점을 투영할 자리가 사실상 없다. 실질 승부는 정량 실적(도시재생 전략/활성화계획 준공실적)과 도시계획 기술사·박사 인력에서 갈리며, 이 두 정량 항목이 우리 팀 기준으로 가장 취약한 게이트키퍼다.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>조달청 입찰참가자격 등록업체이며 학술연구용역(업종코드 1169)를 입찰서 제출마감일 전일까지 등록한 업체</li><li>지계령 제13조·시행규칙 제14조 참가자격 충족 및 제92조 부정당업자 제한 비해당</li><li>정량 실적(6점): 최근 5년간 국가·지자체·공공기관 발주 &#x27;준공한&#x27; 도시재생 전략계획/활성화계획 수립·변경 등 유사용역 — 건수(10건+ 만점)·금액(10억+ 만점), 4건·4억 미만이면 최저점. 실적증명서(발주처/엔지니어링협회) 제출분만 인정, 유사성은 발주처가 판정</li><li>기술인력: 도시계획 등 분야 사업총괄/분야별 책임기술자 자격·경력(기술사/박사~초급, 엔지니어링산업진흥법 등급 기준)</li><li>면허 보완을 위한 공동도급 가능 (대표사는 지분비율 최고, 실적건수 지분무관 1건·금액은 지분 적용)</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>제안서 접수 마감</td><td class='mono'>공고서 참조 (확인 필요) · 방문제출, 접수 시 평가위원 추첨</td></tr><tr><td>제안서 평가</td><td class='mono'>접수 후 별도 안내</td></tr><tr><td>우선협상대상자 선정·통보</td><td class='mono'>선정 후 개별통보</td></tr><tr><td>과업기간</td><td class='mono'>착수일로부터 540일(18개월)</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>과업 본질이 「도시재생법」 제12·13조 법정 &#x27;전략계획 수립(정비)&#x27; — 쇠퇴진단·활성화지역 지정·재원조달·추진체계·성과관리로, 도시계획 엔지니어링사/학술연구기관의 정통 영역이며 시그마애드(호진팀)의 공공디자인·전시·공간연출·경관 정체성과 본질적으로 다르다</li><li>정성 60점 6개 항목이 전부 계획수립 역량 평가라 우리의 &#x27;보여주는 싸움&#x27;(도면·조감도·연출 시나리오) 강점을 투영할 배점 구간이 없다 — 태종대 서비스디자인·부산디자인클러스터형 승부처가 부재</li><li>정량 실적요건이 &#x27;도시재생 전략/활성화계획 준공실적&#x27;으로 특정되어 있어 전시·공간연출 실적으로는 대체 불가. 도시계획 기술사·박사 인력 요구까지 겹쳐 단독 참여 자체가 어렵다</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>실적요건 대응은 도시계획 엔지니어링사와의 공동도급(면허보완)이 사실상 전제 — 이 경우 우리 역할은 경관·공공디자인·주민참여 &#x27;보조 지분&#x27;에 그쳐 주력 수주로서 실익이 낮다</li><li>제안서 접수 마감일시가 메타(clse)에 비어 있어 원문 공고서에서 반드시 확인 필요 — 방문제출(우편 불가), 안동시 건축과 제출</li><li>가격배점 20% + 협상계약 구조상 기술 80점이 관건이나, 그 80점의 대부분이 우리가 열위인 도시계획 실적·인력·계획역량이라 진입해도 승산이 구조적으로 낮다</li></ul></section>
+ </div>
+
+ <div class="foot">나라장터 API 자동수집→제안요청서 자동추출→배점 역산 분석. 공고번호 R26BK01631069. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01630396" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>동빙고어린이영어도서관 인터랙티브 콘텐츠 체험 시스템 구축 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01630396</b><br>기초금액 <b>1.87억 (VAT 포함)</b><br>마감 <b>2026-07-24 17:00 (D-6)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>서울 용산구 교육지원과 독서진흥팀 (담당 서예빈 02-2199-6504 / 계약 재무과 황보람 02-2199-6746)</td></tr><tr><th>예산</th><td>사업비 187,000,000원 VAT 포함 / 추정가격 약 1.7억 (VAT 제외)</td></tr><tr><th>계약방식</th><td>협상에 의한 계약 (제한경쟁입찰, 긴급공고) · 단독도급(공동수급 불허) · 하도급 불허</td></tr><tr><th>과업기간</th><td>계약체결일로부터 2개월(60일)</td></tr><tr><th>위치</th><td>서울 용산구 동빙고어린이영어도서관 (2026년 신규 조성)</td></tr><tr><th>법적성격</th><td>「소프트웨어 진흥법」 적용 SW사업 — 대기업 참여 불가, SW사업 영향평가·과업심의위 대상</td></tr><tr><th>대상장비</th><td>미디어월(65&quot;) · 인터랙티브 북라이즈(86&quot;) · 인터랙티브 플레딧(LED 3,200x1,920) · 통합관리시스템</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">★ 명칭은 &#x27;인터랙티브 콘텐츠 체험&#x27;이지만 실질은 「소프트웨어 진흥법」이 적용되는 전형적 ICT 시스템 구축(SI) 사업이다. 요구사항 58개가 SFR(기능개발)·DAR(데이터 표준화·모델링·이관 11건)·SER(시큐어코딩·암호화)·PER(성능)·표준프레임워크·개발언어 준수 중심으로 짜여 있고, 도서관 자료관리시스템 연계·OpenAPI·DB 설계가 과업의 뼈대다. 핵심 체험 콘텐츠인 북라이즈·플레딧은 &#x27;반드시 시스템 제조사의 물품공급 및 기술지원(특허증·물품공급확약서 필수)을 통해 구축&#x27;하도록 규정되어, 수행사는 특정 제조사 장비를 납품·통합하는 역할에 가깝다. 공간연출·전시디자인 요소는 하우징 디자인 수준에 그치고, 우리 팀 주력인 공간설계·동선·전시매체 연출은 배점에 존재하지 않는다.</div>
+     <ul style="margin-top:8px"><li>ICT 시스템 구축 — 미디어월/북라이즈/플레딧 장비 도입·설치 및 통합관리시스템 개발(SFR 10건)</li><li>SW 개발 — 전자정부표준프레임워크·시큐어코딩·SSL/TLS 기반 기능 개발, 도서관 자료관리시스템·카카오·알라딘 OpenAPI 연계</li><li>데이터 구축 — 데이터 표준화·논리/물리 모델링·이관·개방(DAR 11건), 열린데이터광장 연계</li><li>체험 콘텐츠 — 북라이즈·플레딧은 특허 보유 제조사 물품공급/기술지원 확약 필수(자체 제작 아님)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정성(70)</td><td>전략 및 방법론 — 대상사업 이해도, 추진전략 창의성·타당성, 적용기술 확장성·표준프레임워크·개발방법론</td><td class="pt mono">15</td></tr><tr class="hi"><td>정성(70)</td><td>기술 및 기능 — 각 요구사항(58건)에 대한 제안내용·방법의 적정성</td><td class="pt mono">20</td></tr><tr class=""><td>정성(70)</td><td>성능 및 품질 — 성능확보방안·요구성능 충족성, 품질보증계획</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>프로젝트 관리 — 위험/자원/진도/보안/형상 관리방법론, 일정계획</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>프로젝트 지원 — 교육훈련·기술이전, 하자보수·비상대책, 기밀보안</td><td class="pt mono">15</td></tr><tr class="hi"><td>정량(20)</td><td>수행실적 금액 4 · 실적 건수 4 · 경영상태(신용등급) 6 · 기업·품질인증 6</td><td class="pt mono">20</td></tr><tr class=""><td>가격(10)</td><td>입찰가격 평점 산식(예정가 80% 이상)</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 기술능력 90(정량20+정성70) + 가격10. 정성 승부처가 &#x27;기술·기능 20점(요구사항 적정성)&#x27;과 &#x27;전략·방법론 15&#x27;로, 공간연출·전시가 아니라 SW개발방법론·표준프레임워크·데이터모델링 역량을 요구한다. 유사실적(정량)은 &#x27;도서관 어린이 체험공간 ICT 시스템 구축&#x27;으로 한정. 협상적격 커트라인 = 기술능력 배점한도의 85%. 차등점수제(순위간 3점) 적용.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>「소프트웨어 진흥법 시행령」제53조 SW사업자(컴퓨터관련서비스사업, 업종코드 1468) + 「정보통신공사업법」 정보통신공사업(업종코드 0036) 보유</li><li>공공구매정보망(smpp.go.kr) &#x27;직접생산 확인&#x27; 등재 필수 — 영상정보디스플레이장치(4511189301)·안내전광판(5512190301)</li><li>중소기업만 참여 가능(대기업·상호출자제한기업 배제, 대기업 하도급·인력파견 형태도 불가)</li><li>공동수급 불허(단독도급), 하도급 불허 — 시스템 구축 일관성·긴급이행 사유</li><li>정량 유사실적: 최근 3년 &#x27;도서관 어린이 체험공간 ICT 시스템 구축&#x27; 준공실적으로 한정</li><li>북라이즈·플레딧: 제조사 특허증·물품공급 및 기술지원 확약서 제출 필수</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰·제안서 접수 마감</td><td class='mono'>2026-07-24 17:00</td></tr><tr><td>사업설명회</td><td class='mono'>제안요청서로 갈음(별도 미개최)</td></tr><tr><td>사업기간</td><td class='mono'>계약체결일 ~ +2개월(60일)</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>★ 실질이 IT SI·SW개발 사업 — 요구사항이 SFR(기능개발)·DAR(데이터 표준화·모델링·이관)·SER(시큐어코딩)·표준프레임워크·OpenAPI 연계 중심으로, 우리 주력인 공간연출·전시디자인이 아니다</li><li>핵심 체험 콘텐츠(북라이즈·플레딧)는 특허 보유 제조사의 물품공급·기술지원 확약이 강제되어 사실상 특정 벤더 종속 납품·통합 구조 — 창의적 연출로 차별화할 여지가 배점에 없음</li><li>배점 어디에도 공간구성·동선·전시매체 연출 항목이 없고 개발방법론·성능/품질·데이터모델링이 정성 승부처 — 우리 강점 구간과 불일치</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>참가자격 자체가 결격: SW사업자(코드1468)+정보통신공사업(코드0036) 등록과 &#x27;직접생산 확인(디스플레이·전광판)&#x27;이 필수 — 미보유 시 입찰 불가</li><li>공동수급·하도급 모두 불허(단독도급)여서 IT 파트너와 컨소시엄으로 우회 참여도 봉쇄</li><li>긴급공고로 마감 7/24(D-6), 기간 2개월(60일)로 촉박 — 설령 자격을 갖춰도 데이터 표준화·모델링·이관 산출물 분량 대비 무리</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서(HWPX) 자동추출 → 배점·자격 역산 분석으로 생성됨. 공고번호 R26BK01630396. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01636322" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>제23회 익산 천만송이 국화축제 행사장 공간조성 및 야간경관 조명 설치 운영 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01636322</b><br>기초금액 <b>1.8억 (VAT 포함)</b><br>마감 <b>2026-08-06 16:00 (D-19)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>익산시 농업기술센터 기술보급과 화훼작물계 (담당 신재원 · 063-859-5665)</td></tr><tr><th>예산</th><td>180,000,000원 VAT 포함 / 추정가격 약 1.64억 (163,636,364원)</td></tr><tr><th>계약방식</th><td>제한경쟁입찰 · 협상에 의한 계약 (지방계약법) · 공동수급 참여 불가</td></tr><tr><th>용역기간</th><td>착수일 ~ 2026. 11. 30. (과업 ~11.20)</td></tr><tr><th>세부기간</th><td>조성 10.5~10.22 · 운영 10.23~11.8(17일) · 철거·원상복구 11.9~11.30</td></tr><tr><th>위치</th><td>익산 중앙체육공원, 신흥공원 일원</td></tr><tr><th>연출주제</th><td>GLOW IKSAN — 꽃이 보석이 되는 가을, 익산</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">『제23회 익산 천만송이 국화축제』(전시 10.23~11.8, 17일간) 행사장을 낮부터 밤까지 연출하는 과업. 본질은 실내전시관(70*20*4m 천막구조물)·대형쉼터(20*30*6m)·트러스 조명·보이는라디오 컨테이너·유아휴게실 등 대형 임시 시설물의 임차·제작·설치와, 사업부서 제공 국화조형물을 활용한 빛연출·경관조명·빛조형물 포토존 설치, 그리고 축제기간 운영관리·철거·원상복구까지. 공간연출·야간경관 요소가 있으나 실체는 &#x27;축제 행사장 시설·조명 설치·운영 대행&#x27;에 가깝다. 성과품도 &#x27;주·야간 설치 현장 사진&#x27;.</div>
+     <ul style="margin-top:8px"><li>전시행사장·휴식공간 조성 — 실내전시관(70*20*4m 천막, 가벽 200m+), 대형쉼터 객석(20*30*6m), 라디오부스·유아휴게실 컨테이너</li><li>야간경관 조명·시설물 설치·운영·철거 — 트러스 조명(20*40*4m), 디자인조명 5개소, 동선유도 조명길, 분전함 포함</li><li>국화조형물 활용 빛연출 및 빛조형물 포토존 — 무빙 빛조형물(3m+) 2개 포함 10개 이상, 신흥공원 수변 야간 포토존</li><li>축제기간(17일) 운영관리 및 종료 후 12일 내 철거·원상복구</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정량(20)</td><td>수행실적 — 최근 3년 국가·지자체 축제/행사장 연출 실적 누계 (5억+ 만점)</td><td class="pt mono">6</td></tr><tr class=""><td>정량(20)</td><td>경영상태 — 기업신용평가 등급</td><td class="pt mono">5</td></tr><tr class=""><td>정량(20)</td><td>사업수행능력 — 기술인력 보유상태 (조경·원예·화훼장식·제품·시각디자인·컬러리스트 자격 한정)</td><td class="pt mono">5</td></tr><tr class=""><td>정량(20)</td><td>신인도 — 최근 3년 부정당업체 제재여부</td><td class="pt mono">4</td></tr><tr class="hi"><td>정성(70)</td><td>기획능력 — 주제 명확성·축제 이해도(10) + 사업계획 타당성·독창성(10)</td><td class="pt mono">20</td></tr><tr class="hi"><td>정성(70)</td><td>연출 및 디자인 능력 — 야간경관 연출(10) + 국화조형물 조화·빛조형물 차별화(15) + 시설물 설치능력(5)</td><td class="pt mono">30</td></tr><tr class=""><td>정성(70)</td><td>운영 및 사후관리 — 전문인력·상시배치(5) + 안전·원상복구(5) + 예상문제 대응(5) + 지역경제 기여(5)</td><td class="pt mono">20</td></tr><tr class=""><td>가격(10)</td><td>제안가격 총액 평점산식 (예정가 80% 기준 분기)</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 정성 70점 중 &#x27;연출·디자인 30&#x27;이 최대 배점이고, 그 안에서도 국화조형물 조화·빛조형물 차별화(15)와 시설물 설치능력(5)이 핵심. 순수 디자인 창의성보다 &#x27;실물 시설·조명을 실제로 설치·운영할 수 있는가&#x27;를 함께 본다. 커트라인 합산 70점 이상 협상적격.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>산업디자인전문회사(환경디자인 4442 또는 종합디자인 4444) 등록 + 기타자유업(행사대행업 9901) 등록 법인 — 둘 다 필수</li><li>★ 나라장터에 조형물(6012100201) 제조물품 입찰참가 등록 + LED경관조명(3911160501) 직접생산확인증명서 소지 필수 — 제조·직접생산 요건</li><li>중소기업/소상공인 확인서 유효, 국세·지방세 체납 없음, 지문인식 신원확인 입찰</li><li>공동수급(컨소시엄) 참여 불가 — 단독 업체가 위 자격을 모두 보유해야 함</li><li>정량 실적: 최근 3년 국가·지자체 축제/행사장 연출 사업 누계 (5억+ 시 6점 만점, 협회·공공기관 확인 실적증명서)</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰 공고</td><td class='mono'>2026-07-16 ~ 2026-08-06</td></tr><tr><td>제안서 접수 마감</td><td class='mono'>2026-08-06 14:00~16:00 (방문접수만, 익산시농업기술센터)</td></tr><tr><td>제안서 평가위원회</td><td class='mono'>2026-08-11 14:00 (발표 15분 + 질의응답 15분)</td></tr><tr><td>협상대상자 선정·통보</td><td class='mono'>2026-08-14 이내</td></tr><tr><td>협상 완료</td><td class='mono'>2026-08-26 이내</td></tr><tr><td>용역 종료</td><td class='mono'>2026-11-30</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>★ 본질이 축제 행사장 시설·조명 설치·운영 대행 — 대형 천막구조물·트러스·컨테이너 임차·제작·설치와 17일 운영·철거·원상복구가 과업의 실체. 팀의 &#x27;행사대행 타깃 제외&#x27; 방침에 정면 배치</li><li>참가자격이 사실상 결격 — 행사대행업(9901) 등록, 조형물(6012100201) 제조물품 등록, LED경관조명 직접생산확인증명서를 단독으로 모두 보유해야 하고 공동수급도 불가. 디자인 제안 전문팀 단독 참여 불가에 가까움</li><li>배점 구조가 시공·운영 역량 중심(시설물 설치능력·운영·안전·원상복구) — 우리 강점인 순수 공간연출·경관 기획으로 벌 수 있는 점수 비중이 제한적</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>직접생산확인증명서·제조물품 등록·행사대행업 등록 미보유 시 정성 만점도 무의미 — 참여 자체가 불가</li><li>10.5~10.22 조성 후 축제 17일 상시 운영·유지보수·11월 철거 원상복구까지 물리적 현장 부담이 큰 시공·운영형 과업</li><li>정량 실적요건이 &#x27;축제·행사장 연출&#x27; 한정이라 우리 전시·경관 실적(태종대·남해경관 등)이 그대로 인정될지 불확실</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서(HWPX) 자동추출 → 배점·자격 역산 분석으로 생성됨. 공고번호 R26BK01636322. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01636967" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>신장2동 도시재생뉴딜사업 지역역량강화 용역(5차)</h1></div>
+   <div class="meta">공고번호 <b>R26BK01636967</b><br>기초금액 <b>1.6억 (VAT 포함)</b><br>마감 <b>2026-08-06 10:00 (D-19)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>경기도 평택시 스마트도시과 도시재생2팀 (박한나 · 031-8024-3982)</td></tr><tr><th>예산</th><td>160,000,000원 VAT 포함 / 추정가격 약 145,454,545원</td></tr><tr><th>계약방식</th><td>협상에 의한 계약 (지방계약법 시행령 제43조, 일반경쟁)</td></tr><tr><th>과업기간</th><td>착수일 ~ 2026. 12. 31. (약 4개월)</td></tr><tr><th>위치</th><td>평택시 신장2동 269-132번지 일원</td></tr><tr><th>수행방법</th><td>사업대상지 내 용역사 전담인력 1명 상주</td></tr><tr><th>공동수급</th><td>해당없음 (단독 도급)</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">2020년 선정된 신장2동 도시재생뉴딜사업(우리동네살리기)의 사업 종료를 앞두고, 주민조직(신장마을관리사회적협동조합)이 사업 이후에도 자립적으로 거점시설을 운영하도록 만드는 &#x27;주민역량강화·자립모델 구축&#x27; 용역. 지역 현황조사→세대공감 프로그램 운영→거점시설 운영매뉴얼 작성→주민주도 시범사업 지원→성과공유회 기획·운영이 핵심 축. 본질은 주민참여·컨설팅·프로그램 운영·계획수립 성격의 학술연구용역(업종코드 1169)이며, 홍보물·전시패널 제작은 부수 요소.</div>
+     <ul style="margin-top:8px"><li>자립모델 고도화를 위한 지역 현황조사 (지역돌봄·생활서비스·수익사업 수요조사, 인터뷰·설문)</li><li>세대공감 프로그램 기획·운영 (아동·청소년·청년·중장년·어르신 교류 프로그램, 파일럿 운영)</li><li>거점시설 운영모델 구체화 및 자립모델 운영매뉴얼 작성 지원 (공간별 운영계획·역할분담·수익구조)</li><li>주민주도 소규모 시범사업 발굴·기획·운영 지원 (워크숍·역량강화 교육·사업성 검토)</li><li>지역 연계사업 발굴 (행정·복지·교육·민간단체 협력)</li><li>성과 정리·분석 및 성과공유회 기획·운영 (전시패널·간담회·발표자료)</li><li>도시재생 추진성과·시범사업 홍보 (카드뉴스·보도자료·SNS·홍보물)</li><li>현장 상시 운영 지원 및 모니터링 (전담인력 1명 상주, 회의·의견수렴·결과정리)</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정성(60)</td><td>제안 개요 — 과업(도시재생활성화사업) 이해도, 유사 수행경험·기술자 전문성, 대상지 도시재생 이슈·쇠퇴진단</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(60)</td><td>과업수행계획 — 지역여건 분석, 협동조합 실무역량강화 방안·컨설팅, 거점시설 운영계획, 주택개량지원사업 이해, 전차시 연계성, 운영계획 실현가능성, 소요사업비·단계별 실행계획</td><td class="pt mono">40</td></tr><tr class=""><td>정성(60)</td><td>상호협력 방안 — 추진체계·거버넌스, 부서간 협업·주민갈등 관리</td><td class="pt mono">5</td></tr><tr class=""><td>정성(60)</td><td>지원기술 계획·관리방안 — 피드백·보완, 지속가능한 추진체계·거버넌스</td><td class="pt mono">5</td></tr><tr class=""><td>정량(20)</td><td>기술인력 자격·경력 6 · 유사용역 실적 6(건수3+금액3) · 신용도 4 · 경영상태 4</td><td class="pt mono">20</td></tr><tr class=""><td>가격(20)</td><td>입찰가격 평정산식 (예정가격 80% 기준)</td><td class="pt mono">20</td></tr></tbody></table>
+   <div class="note">★ 정성 60점 중 &#x27;과업수행계획 40점&#x27;이 사실상 당락을 좌우. 세부요소가 협동조합 실무역량강화·거점시설 운영계획·주택개량지원사업 이해·전차시(1~4차) 연계성 등 도시재생 컨설팅 전문성을 요구 — 공간연출·실감콘텐츠 역량이 개입할 여지가 거의 없음. 협상적격 커트라인 종합 70점 이상. 차등점수제 미적용.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>학술연구용역(업종코드 1169) 나라장터 입찰참가 등록 업체 — 필수</li><li>중소기업 또는 소상공인 확인서 소지 업체</li><li>정량 유사실적: 최근 5년간 국가·지자체·공공기관 발주 &#x27;도시재생활성화사업 또는 지역역량강화 용역&#x27;에 한하여 인정 (하도급 실적 불인정). 건수 8건·금액 8억 만점, 4건·4억 이상부터 실질 배점</li><li>공동도급 해당없음(단독). 참여기술자는 공고일 기준 1개월 이상 상근 요건(4대보험 증빙)</li><li>제안서 A4 30장 내외 13부(원본2·평가본11) 방문 제출, 발표 PPT 20장 이내 — 우편접수 불가</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰공고</td><td class='mono'>2026. 7. 예정 (나라장터·평택시청)</td></tr><tr><td>제안서 접수 마감</td><td class='mono'>2026-08-06 10:00 (방문접수, 평택시청 스마트도시과)</td></tr><tr><td>제안서 평가</td><td class='mono'>접수 후 제안서 평가위원회 (업체당 발표 15분·질의 5분)</td></tr><tr><td>협상·계약체결</td><td class='mono'>우선협상대상자 선정 후 15일 내 협상, 성립 후 10일 내 계약</td></tr><tr><td>용역 종료</td><td class='mono'>2026-12-31</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>과업 본질이 주민역량강화·협동조합 컨설팅·자립모델 매뉴얼·프로그램 운영·성과공유회 등 &#x27;계획·운영·컨설팅형 학술연구용역&#x27;으로, 우리 주력인 공간연출·전시·실감콘텐츠·서비스디자인과 정합성이 낮음</li><li>입찰자격이 학술연구용역(코드 1169) 등록 + 중소기업·소상공인 확인서 필수이며, 정량 유사실적도 &#x27;도시재생활성화/지역역량강화 용역&#x27;으로만 한정 — 디자인 전문사의 등록·실적 요건 충족이 어려움</li><li>당락을 가르는 과업수행계획 40점이 협동조합 실무역량강화·거점시설 운영계획·주택개량지원사업 이해·전차시 연계성 등 순수 도시재생 실행 전문성을 요구 — 우리 강점을 배점에 실을 구간이 사실상 없음</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>유사실적 인정범위가 도시재생·지역역량강화로 엄격 한정되어, 태종대·부산디자인클러스터 등 우리 실적으로는 정량 6점 확보가 불가능(정성 만점도 무의미해질 수 있음)</li><li>평택 신장2동 현장에 전담인력 1명을 4개월 상주시켜야 함 — 프로그램 운영·주민회의·현장지원 실무 리소스 부담이 크고, 디자인팀 인력 구조와 맞지 않음</li><li>우리 강점이 개입할 지점(카드뉴스·전시패널·성과공유회 연출)은 전체 과업의 소수 비중이며 별도 배점이 없어, 강점만으로 수주 우위를 만들기 어려움</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서·과업지시서(HWPX) 자동추출 → 배점 역산 분석으로 생성됨. 공고번호 R26BK01636967. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01637890" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>[재공고]구미시 도시재생전략계획(2026~2035년) 수립 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01637890</b><br>기초금액 <b>1억원 (VAT 포함)</b><br>마감 <b>2026-07-27 16:00 (D-9)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>경상북도 구미시 건축디자인과 도시재생1팀 (담당 안해진 · 054-480-5094 / 등록접수 054-480-5602)</td></tr><tr><th>예산</th><td>100,000,000원 VAT 포함 / 추정가격 약 90,909,091원</td></tr><tr><th>계약방식</th><td>제한경쟁입찰 (협상에 의한 계약) · 재공고 — 최초 소기업·소상공인 제한경쟁 유찰 후 중소기업자(중기업 포함)로 자격 확대</td></tr><tr><th>과업기간</th><td>착수일 ~ 2026년 12월 (실질 8~12월, 약 5개월)</td></tr><tr><th>위치</th><td>구미시 도시지역 일원</td></tr><tr><th>범위</th><td>기준년도 2026 / 목표년도 2035 — 2035 도시재생전략계획 변경 수립</td></tr><tr><th>공동수급</th><td>분담이행방식 가능 (면허 보완 목적) · 대표사 3개사 이내 · 구성원 최소지분 5%</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">구미시 도시지역 전체를 대상으로 2035년 목표의 도시재생전략계획을 변경 수립하는 법정계획 용역. 기초조사 → 쇠퇴진단·여건분석 → 재생권역 설정 → 도시재생활성화지역 신규지정·변경·해제 검토 → 활성화지역별 우선순위·연계방안 → 재원조달·추진체계·성과관리까지, 도시재생법 제12·13조 기반의 도시계획 엔지니어링 성격이 지배적인 과업. 주민의견 수렴·공청회·도시재생위원회 심의 등 행정절차 지원이 필수. 성과품은 A4 개조식 보고서(최종 20부)와 1/25,000~1/50,000 총괄도.</div>
+     <ul style="margin-top:8px"><li>2035 도시재생전략계획 수립 — 비전·목표·범위, 재생권역(생활권) 설정, 기초생활인프라 국가최저기준 방향</li><li>지역자원 조사 및 물리·사회·경제적 여건분석, 쇠퇴원인 분석·쇠퇴진단(집계구/행정동 단위)</li><li>도시재생활성화지역 신규지정·변경·해제 검토 및 지정기준·유형(혁신지구·지역특화재생) 제시</li><li>활성화지역별 우선순위 설정 및 지역 간 연계방안, 도시재생 실행력 확보방안</li><li>추진체계·운영방안, 재원조달계획(특별회계·마중물·민간투자), 성과관리·모니터링 지표 설정</li><li>주민의견 수렴(전문 자문단 5인+·현장 참여단 10인+), 공청회·지방의회 의견청취·도시재생위원회 심의 등 행정절차 지원</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정성(70)</td><td>과업이해 — 과업의 목적·수행능력, 도시재생전략계획 목표 부합성, 투입인력 조직·전문성</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>지역진단 및 방향설정 — 지역여건 분석·쇠퇴진단 적절성, 지역맞춤 재생방향, 계획방향 타당성</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>목표달성 구상의 합리성 — 사업비전·목표 합리성, 전략·기본구상의 중장기 비전 효과성</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(70)</td><td>제안내용의 구체성 및 창의성 — 계획 독창성·합리성, 내용 구체성, 시행·운영 실현성, 스마트 재생 등 신기술 적용</td><td class="pt mono">20</td></tr><tr class=""><td>정성(70)</td><td>지속 운영관리방안 실현가능성 — 운영체계 적합성, 주민역량강화·지역공동체·일자리 창출 실현성</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>지역발전 및 지속가능성 — 지역 기여도·파급성, 목표지표 평가·모니터링 계획 적합성</td><td class="pt mono">10</td></tr><tr class="hi"><td>정량(20)</td><td>기술인력 보유상태 6 · 유사용역 수행실적 6 · 신인도 4 · 경영상태(신용평가) 4</td><td class="pt mono">20</td></tr><tr class=""><td>가격(10)</td><td>입찰가격 평점산식 (행안부 예규 344호)</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 기술능력 90점(정성 70+정량 20) : 가격 10점 구조로 기술 압도. 그러나 정성 70점 전 항목이 쇠퇴진단·활성화지역 지정·재원조달 등 도시계획 엔지니어링 코어이며, 우리 강점(디자인·연출)이 개입할 배점은 사실상 없음. 정량 실적 6점은 &#x27;도시재생전략계획·활성화계획·도시재생사업 용역&#x27;에 한정. 정성은 최고·최저 위원 점수 제외 후 산술평균.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>나라장터(G2B) 입찰참가자격 등록 필수 — 학술·연구용역(1169) + 엔지니어링사업(도시계획, 3583) 또는 기술사사무소(도시계획, 1351) 또는 건축사사무소(4817)</li><li>중·소기업·소상공인 확인서 소지자 (재공고로 중기업 포함까지 확대). 조달청 전자입찰 참가자격 등록 필수</li><li>사업총괄책임기술자는 대표사 소속 &#x27;도시계획 분야&#x27; 기술자 필수 — 도시계획 기술사·박사 또는 건축분야 건축사로 평가</li><li>정량 실적(6점): 최근 5년 국가·지자체·공공기관 발주 준공, 자기지분 8천만원 이상. 인정사업은 &#x27;도시재생전략계획·도시재생활성화계획·도시재생사업 용역&#x27;에 한함 — 건수 10건+ / 금액 10억+ 만점</li><li>공동수급(분담이행) 가능 — 대표사는 엔지니어링(도시계획) 자격 보유사, 구성원 3개사 이내·최소지분 5%. 면허 보완 목적으로 허용</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰 재공고</td><td class='mono'>2026-07-16 ~ 2026-07-27</td></tr><tr><td>입찰등록·제안서 접수 (직접 방문)</td><td class='mono'>2026-07-27 09:00~16:00</td></tr><tr><td>제안서 평가</td><td class='mono'>2026-07-30 14:00~ (구미시 금리단상생팩토리 3층)</td></tr><tr><td>우선협상 대상자 선정·계약</td><td class='mono'>별도 통보 (협상 15일·계약 10일 이내)</td></tr><tr><td>용역 종료</td><td class='mono'>2026년 12월</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>★ 참가자격 자체가 도시계획 엔지니어링사(3583)·기술사사무소(도시계획 1351)·건축사사무소(4817) 면허 필수 — 시그마애드(호진팀)는 해당 면허 미보유로 단독 입찰이 원천 불가</li><li>정량 실적 6점이 &#x27;도시재생전략계획·활성화계획·도시재생사업 용역&#x27;에만 한정 — 태종대 서비스디자인·부산디자인클러스터·경관가이드·공공디자인 실적은 1건도 인정되지 않아 정량 실적은 사실상 최하점</li><li>정성 70점 전 항목이 쇠퇴진단·활성화지역 지정·재원조달·법정 행정절차 등 도시계획 엔지니어링 코어. 사업총괄책임기술자도 도시계획 기술사/박사 필수라, 공간연출·웨이파인딩·실감콘텐츠 등 우리 검증 역량이 득점에 기여할 지점이 없음</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>유일한 참여 경로는 도시계획 엔지니어링사를 대표사로 한 분담이행 공동수급의 소수지분(최소 5%) 구성원 — 주민참여·경관/공공디자인 파트 한정. 다만 실적 미인정·배점 기여 낮아 실익이 미미하고, 대표사 확보·협정 체결을 마감 D-9(7/27) 내 완료해야 하는 시간 제약</li><li>재공고 건으로 유찰 이력 — 경쟁 열위 시 다시 유찰될 수 있으나, 그렇다고 우리 정체성에 맞는 판이 되는 것은 아님(자격·실적 벽은 동일)</li><li>제안서 접수 직접 방문(우편·이메일 불가, 7/27 09:00~16:00, 구미시청)·발표평가 7/30 등 일정이 촉박하고, 정성 20페이지 이내 컬러 제한 등 도시계획 전문 원고 분량 대비 준비기간 부족</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서·과업지시서(HWPX) 자동추출 → 배점 역산 분석으로 생성됨. 공고번호 R26BK01637890 (재공고). 참가자격·실적요건이 도시계획 엔지니어링 면허에 종속되므로 최종 판단 전 원문 및 자사 면허·실적 대조 필수.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01628861" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>용봉패션의거리 거리조명(가로등주 취부형 경관조명 설치사업)</h1></div>
+   <div class="meta">공고번호 <b>R26BK01628861</b><br>기초금액 <b>75,000,000원 (VAT 포함) / 추정가격 약 6,818만원</b><br>마감 <b>2026-07-29 17:00 (D-11)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>용봉패션의거리 문화관광형시장 육성사업단 (담당 이병운 · 070-7576-4777)</td></tr><tr><th>예산</th><td>75,000,000원 VAT 포함 / 추정가격 약 6,818만원 (소상공인시장진흥공단 문화관광형시장 육성사업비)</td></tr><tr><th>계약방식</th><td>제한경쟁 입찰 · 협상에 의한 계약 (국가계약법 시행령 제43조)</td></tr><tr><th>과업기간</th><td>계약일 ~ 2026. 10. 31. (7~10월, 무상 보수·관리 포함)</td></tr><tr><th>위치</th><td>광주 북구 용주로 2, 용봉패션의거리 일원 (비엔날레~패션의거리 구간)</td></tr><tr><th>과업규모</th><td>가로등주 취부형 경관조명 총 15개(±5개) 설치 + 전기공사</td></tr><tr><th>공동수급</th><td>공동이행·하도급 모두 불가 (단독 수행)</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">용봉패션의거리 가로등주에 취부하는 RGB LED 경관조명 15개(±5) 를 설치하는 사업. 명목상 &#x27;경관조명·디자인 기획&#x27;을 표방하지만, 예산 7,500만원 중 6,000만원이 조명기구 물품구입, 1,500만원이 전기 배선·설치공사로 구성되어 사실상 조명 제조·전기시공 위주 사업이다. 자격요건도 전기공사업 면허 + LED경관조명 직접생산확인증명서 + KS C 7713 인증 + 제조·설치 실적을 모두 요구해, 조명 제조·시공 전문업체를 정조준한 공고. 디자인 기획 비중은 마스터플랜·연출 수준으로 제한적이다.</div>
+     <ul style="margin-top:8px"><li>거리조명 마스터플랜 및 세부 연출 디자인 기획 (비엔날레 기 설치 조명에 준함)</li><li>경관조명 기구 설계·제작·구입 및 가로등주 취부 설치 (RGB 36W, DC24V, IP65 이상)</li><li>전기 배관·배선 및 구조물 설치 공사 (전기공사업법·경관법 준수)</li><li>통합 제어 시스템 구축 및 연출 프로그래밍, 시운전·테스트</li><li>하자보수·무상 유지관리 및 A/S 대응 체계 운영</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정성(70)</td><td>과업의 이해 및 방향 설정의 적정성 — 제안요청 부합성, 추진방향·목표 적합성, 이해도</td><td class="pt mono">10</td></tr><tr class=""><td>정성(70)</td><td>수행계획의 적정성 — 기본전략, 방향 설정의 적합·효과성, 실행계획의 구체성·현실성·효율성</td><td class="pt mono">15</td></tr><tr class=""><td>정성(70)</td><td>기획·구성력·전문성·적합성 — 기획의 창의성·타당성, 기술의 전문성 및 적용 적합성</td><td class="pt mono">15</td></tr><tr class="hi"><td>정성(70)</td><td>제안과업 및 수행방법의 적합성 — 제안내용 부합성, 수행전략·방법 타당성, 인력구성·역할분담</td><td class="pt mono">20</td></tr><tr class=""><td>정성(70)</td><td>기타 — 추가 제시 제안내용, 사후 유지관리 등</td><td class="pt mono">10</td></tr><tr class=""><td>정량(20)</td><td>최근 3년 수행실적 5 · 신용도(행정처분) 5 · 전문인력 보유현황 10</td><td class="pt mono">20</td></tr><tr class=""><td>가격(10)</td><td>총괄 입찰가격 평정 산식 (사업예산 80% 이상 기준)</td><td class="pt mono">10</td></tr></tbody></table>
+   <div class="note">★ 기술능력평가 90%(정량20+정성70) + 가격 10%. 기술평가 90점 만점의 80%(72점) 미만이면 우선협상 대상 제외. 정성 최대 배점은 &#x27;제안과업 및 수행방법의 적합성&#x27; 20점이나, 배점 자체는 조명 제조·시공 전문성을 전제로 설계되어 디자인 제안력만으로 상위 득점하기 어려운 구조. 전문인력 보유(정량 10점)는 PM 경력+참여인력 규모로 결정.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>★ 전기공사업(업종코드 0037) + 산업디자인전문회사(환경디자인 분야, 4442) 면허를 &#x27;모두&#x27; 보유 — 이중 면허 요건</li><li>★ ① LED경관조명기구 ② 조명용 제어장치 두 품목 직접생산확인증명서 모두 보유 + KS C 7713(LED 경관등) 인증 보유</li><li>최근 3년 내 LED 경관조명 &#x27;제조 및 설치&#x27; 분야 단일 계약금액 5천만원 이상 실적 보유</li><li>중소기업확인서 소지 + 주 영업소 소재지를 전남·광주(광주광역시)에 둔 업체 — 지역 제한</li><li>공동이행방식 및 하도급 불허 — 단독으로 위 자격을 전부 충족해야 함</li><li>제안서 방문접수 8부(원본1/평가본7) + 가격제안서 별도 밀봉, USB 1식</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>입찰공고</td><td class='mono'>2026-07-14 ~ 2026-07-29</td></tr><tr><td>제안서 접수 마감(방문)</td><td class='mono'>2026-07-29 17:00</td></tr><tr><td>제안서 심사·발표평가</td><td class='mono'>2026-07-30 14:00~ (발표 15분+질의 15분)</td></tr><tr><td>협상·계약체결</td><td class='mono'>통보일로부터 7일 이내</td></tr><tr><td>과업 완료</td><td class='mono'>2026-10-31</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>자격요건이 전기공사업 면허 + LED경관조명 직접생산확인증명서(2품목) + KS C 7713 인증 + 제조·설치 실적으로, 사실상 조명 제조·전기시공 전문업체 전용 공고 — 디자인 제안사(우리)는 입찰 진입선 자체를 넘기 어려움</li><li>예산 7,500만원 중 6,000만원이 조명기구 물품구입, 1,500만원이 전기 배선·설치공사. 디자인·기획비는 별도 항목조차 없어 시공·물품 조달이 본질, 우리 주력인 공간연출·서비스디자인 제안과 결이 다름</li><li>공동이행·하도급 전면 불허 + 주영업소 광주 소재 제한 — 우리가 디자인만 맡는 컨소시엄 구성도 불가능</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>이중 면허·직접생산확인·KS인증 3중 자격장벽 미충족 시 입찰 자체가 무효 (정성 만점도 무의미)</li><li>&#x27;경관조명&#x27;이라는 명칭에 끌려 검토 리소스를 투입해도, 태종대·남해경관형 공간연출 실적이 배점에 반영될 여지가 작음 (배점이 조명 시공 전문성 전제)</li><li>마감 D-11, 방문접수만 가능(우편·이메일 불가) + 현장사전검수조서 사업단 경유 필수로 준비기간 촉박</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 과업지시서·제안요청서 원문 추출 → 배점·자격·예산 역산 분석으로 생성됨. 공고번호 R26BK01628861. 최종 판단 전 원문 대조 권장.</div>
+</div></div>
+<div class="rep" id="rep-R26BK01636885" style="display:none"><button class="back" onclick="home()">← 목록으로</button><div class="page">
+ <div class="top">
+   <div><div class="eyebrow">과업분석보고서 · 수주 판단</div><h1>제31회 부산국제영화제 티켓 카탈로그 디자인 및 인쇄 용역</h1></div>
+   <div class="meta">공고번호 <b>R26BK01636885</b><br>기초금액 <b>7,000만 (VAT 포함) / 추정가격 6,363만</b><br>마감 <b>2026-07-27 16:00 (D-9)</b><br>생성 2026-07-18</div>
+ </div>
+
+ <div class="verdict hold">
+   <span class="vdot"></span>
+   <div><div class="vlabel">적합도 판정</div><div class="vbig">보류</div></div>
+ </div>
+
+ <div class="grid">
+   <section><h2>공고 개요</h2><table class="ov"><tr><th>발주처</th><td>(사)부산국제영화제 (회계팀 051-709-2095 · 프로그램팀 051-709-2121 · 담당 김수현 051-709-2092)</td></tr><tr><th>예산</th><td>70,000,000원 VAT 포함 / 추정가격 63,636,364원</td></tr><tr><th>계약방식</th><td>총액계약 · 협상에 의한 계약 · 제한경쟁입찰(전자입찰)</td></tr><tr><th>사업기간</th><td>계약체결일 ~ 납품완료일 (인쇄 완료 2026-09-17)</td></tr><tr><th>입찰대상</th><td>티켓 카탈로그 1종 (150×220mm, 무선제본, 45,000부)</td></tr><tr><th>평가방식</th><td>기술평가 80 + 가격평가 20, 종합 70점 이상 협상적격 · PT 없음(서류·제안서만 심사)</td></tr><tr><th>제출</th><td>2026-07-27 10:00~16:00 직접방문(영화의전당 비프힐 3층 회계팀) · 우편/이메일/팩스 불가</td></tr></table></section>
+   <section><h2>과업 정의</h2>
+     <div class="summary">제31회 부산국제영화제 관객 배포용 &#x27;티켓 카탈로그&#x27; 1종의 디자인 및 인쇄 용역. 상영작 소개·티켓 구입/이벤트 안내·상영시간표·광고를 담은 총 228p(표지4p+컬러내지48p+흑백내지176p) 무선제본 책자를 45,000부 인쇄·납품하는 과업. 편집디자인 시안 완성도가 정성평가의 핵심이나, 본질은 대량 인쇄물 제작·납품 사업이며 자격요건이 사실상 부산 소재 인쇄사·출판사로 한정된다. 콘텐츠 전달(9/1)→발주(9/10)→납품(9/17)의 초단기 인쇄 공정이 승부처.</div>
+     <ul style="margin-top:8px"><li>티켓 카탈로그 디자인 (상영작 소개·티켓/이벤트 안내·상영시간표·광고 등 콘텐츠 편집)</li><li>인쇄 제작 및 납품 (150×220mm, 컬러/흑백 혼용, 무선제본, 45,000부)</li><li>제작사양: 표지 4p 컬러 + 앞뒤 내지 48p 컬러 + 내지 176p 흑백 (용지·인쇄사양 자유 제안 가능)</li><li>발주처 지정 기간 디자이너 사무국 파견(임금 별도 미지급), 인쇄용 PDF 제출·검수 대응</li></ul>
+   </section>
+ </div>
+
+ <section style="margin-top:16px"><h2>평가 배점 (승부처)</h2>
+   <table class="sc"><thead><tr><th>구분</th><th>평가항목</th><th style="text-align:right">배점</th></tr></thead>
+   <tbody><tr class=""><td>정량(20)</td><td>기술인력 보유 정도 — 일반경력자(3년+) 1인당 2.0 / (2년+) 1인당 1.0</td><td class="pt mono">8</td></tr><tr class=""><td>정량(20)</td><td>수행경험(실적) — 최근 3년 건당 6천만원+ 유사실적 4건 이상 8점 / 3건 7 / 2건 6 / 1건 5</td><td class="pt mono">8</td></tr><tr class=""><td>정량(20)</td><td>신인도 — 부정당업자 제재·영업정지 감점</td><td class="pt mono">4</td></tr><tr class=""><td>정성(60)</td><td>디자인 연계성 — 영화제 이미지 조화 및 적합성</td><td class="pt mono">10</td></tr><tr class=""><td>정성(60)</td><td>디자인 컨셉·디자인 능력</td><td class="pt mono">10</td></tr><tr class=""><td>정성(60)</td><td>과업참여자 포트폴리오</td><td class="pt mono">10</td></tr><tr class="hi"><td>정성(60)</td><td>실현성 — 과업 실행 가능성·적기 납품 실현성</td><td class="pt mono">15</td></tr><tr class="hi"><td>정성(60)</td><td>기획력 — 기획 및 편집 수준, 가독성·창의성</td><td class="pt mono">15</td></tr><tr class="hi"><td>가격(20)</td><td>입찰가격 평점산식 (추정가격 80% 기준)</td><td class="pt mono">20</td></tr></tbody></table>
+   <div class="note">★ 정성 60점 중 기획·편집(가독성·창의성) 15 + 적기납품 실현성 15 = 30점이 당락을 가른다. 편집디자인 시안 완성도가 관건이나 PT가 없어 &#x27;서류와 시안만으로&#x27; 설득해야 하는 구조. 가격 20점 비중이 커 협상적격(70점) 선에서 가격경쟁 압박도 상당. 정량 20점 중 실적(3년·6천만원+ 유사 4건)·인쇄 인력 보유가 실질 진입장벽.</div>
+ </section>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>참가자격 · 실적 요건</h2><ul><li>★ 입찰공고일 전일~계약체결일까지 주된 영업소 소재지가 부산광역시인 업체 (지역제한)</li><li>★ 출판문화산업진흥법 출판사 또는 인쇄문화산업진흥법 인쇄사 신고 필한 업체</li><li>★ 나라장터(G2B) 인쇄사(1518) 또는 출판사(1517) 입찰참가자격 등록 필수</li><li>★ 직접생산확인증명서 &#x27;인쇄출판물-기타인쇄물(세부품번 5510159901)&#x27; 소지 (마감 전일까지 유효)</li><li>중소기업기본법 중소기업 또는 소상공인기본법 소상공인 확인서 소지</li><li>컨소시엄(공동수급체·공동이행방식) 구성 참여 가능 — 주사업자가 전체 책임</li></ul></section>
+   <section><h2>핵심 일정</h2><table class="ov"><tr><td>공고기간</td><td class='mono'>2026-07-16 ~ 2026-07-27</td></tr><tr><td>가격입찰(전자입찰)</td><td class='mono'>2026-07-16 ~ 2026-07-27</td></tr><tr><td>제안서 제출(직접방문)</td><td class='mono'>2026-07-27 10:00~16:00</td></tr><tr><td>심사위원 심사(PT 없음)</td><td class='mono'>2026-07-31</td></tr><tr><td>콘텐츠 전달 마감</td><td class='mono'>2026-09-01</td></tr><tr><td>인쇄 발주</td><td class='mono'>2026-09-10</td></tr><tr><td>납품(인쇄 완료)</td><td class='mono'>2026-09-17</td></tr></table></section>
+ </div>
+
+ <div class="two" style="margin-top:16px">
+   <section><h2>붙어야 하는 이유</h2><ul><li>부산 지역 + BIFF라는 상징성 높은 레퍼런스이고 상영작 소개·시간표·광고 편집은 편집디자인 역량에 부합 — 단독 수주보다 &#x27;레퍼런스 확보&#x27; 관점의 가치는 존재</li><li>협상계약·기술 80점 구조라 편집 시안 완성도로 정성점수를 끌어올릴 여지는 있으나, PT가 없어 우리의 제안·발표 강점이 통하지 않는 판</li><li>본질은 45,000부 대량 인쇄물 제작·납품 사업으로, 우리 주력(공간연출·전시·실감콘텐츠)과 결이 근본적으로 다름 — 무리하게 들어갈 건은 아님</li></ul></section>
+   <section><h2>리스크 · 확인사항</h2><ul><li>★ 자격이 사실상 &#x27;부산 소재 + 인쇄사/출판사 신고 + 인쇄물 직접생산확인증명서&#x27; 보유업체 전용 — 디자인 전문사인 우리는 단독 입찰 자체가 불가할 가능성이 큼(참여하려면 부산 인쇄사와 컨소시엄 필수)</li><li>콘텐츠 전달(9/1)→발주(9/10)→납품(9/17)의 초단기 공정 + 45,000부 무선제본 물량 — 인쇄 물류·품질 리스크와 지체상금(1일 0.8/1000) 부담이 디자인사에겐 직접 통제 밖</li><li>정량 실적요건(최근 3년 건당 6천만원+ 유사 인쇄물 실적)과 인쇄시설 증명원 요구로 디자인 포트폴리오만으로는 배점 확보가 어려움</li></ul></section>
+ </div>
+
+ <div class="foot">본 보고서는 나라장터 API 자동수집 → 제안요청서(재공고, HWP·과업지시서·배점표 포함) 자동추출 → 배점 역산 분석으로 생성됨. 공고번호 R26BK01636885. 최종 판단 전 원문 및 자격요건(부산 소재·인쇄사 신고·직접생산확인증명서) 대조 필수.</div>
+</div></div>
+<script>
+function show(no){document.getElementById('list').style.display='none';
+ document.querySelectorAll('.rep').forEach(r=>r.style.display='none');
+ document.getElementById('rep-'+no).style.display='block';window.scrollTo(0,0);}
+function home(){document.querySelectorAll('.rep').forEach(r=>r.style.display='none');
+ document.getElementById('list').style.display='block';window.scrollTo(0,0);}
+</script>
+</body></html>
