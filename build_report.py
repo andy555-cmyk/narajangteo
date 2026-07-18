@@ -16,9 +16,10 @@ def esc(s): return html.escape(str(s))
 def build(d):
     ov = "".join(f"<tr><th>{esc(k)}</th><td>{esc(v)}</td></tr>" for k, v in d["overview"])
     scope = "".join(f"<li>{esc(s)}</li>" for s in d["scope"])
-    # 배점
+    # 배점 (스키마 방어)
+    sc = d.get("scoring") or {}
     srows = ""
-    for r in d["scoring"]["rows"]:
+    for r in (sc.get("rows") or []):
         hi = " hi" if r.get("key") else ""
         srows += (f'<tr class="{hi.strip()}"><td>{esc(r["group"])}</td>'
                   f'<td>{esc(r["item"])}</td><td class="pt mono">{esc(r["pt"])}</td></tr>')
@@ -33,7 +34,7 @@ def build(d):
         .replace("{{ORG}}", esc(d["org"])).replace("{{AMT}}", esc(d["amt"])) \
         .replace("{{DDAY}}", esc(d.get("dday", ""))).replace("{{OVERVIEW}}", ov) \
         .replace("{{SUMMARY}}", esc(d["summary"])).replace("{{SCOPE}}", scope) \
-        .replace("{{SCORING}}", srows).replace("{{SCORENOTE}}", esc(d["scoring"].get("note", ""))) \
+        .replace("{{SCORING}}", srows).replace("{{SCORENOTE}}", esc((d.get("scoring") or {}).get("note", ""))) \
         .replace("{{QUAL}}", qual).replace("{{VERDICT}}", esc(d["fit"]["verdict"])) \
         .replace("{{VCLASS}}", vclass).replace("{{REASONS}}", reasons).replace("{{RISKS}}", risks) \
         .replace("{{SCHED}}", sched).replace("{{SRC}}", esc(d.get("source", "")))

@@ -26,16 +26,21 @@ def dday(clse):
     d = datetime.date(*map(int, m.groups()))
     return (d - datetime.date(2026, 7, 18)).days
 
+import glob as _glob
+have_report = set(re.findall(r"report_([A-Za-z0-9]+)\.html", " ".join(_glob.glob("report_*.html"))))
+
 rows = list(csv.DictReader(open("g2b_result.csv", encoding="utf-8-sig")))
 data = []
 for r in rows:
     try: amt = int(r["기초금액"])
     except: amt = 0
+    no = r["공고번호"]
     data.append({
         "grade": r["등급"], "rfp": r["RFP"], "region": r["지역매칭"] == "Y",
         "name": r["공고명"], "org": r["수요기관"], "amt": amt, "amtLabel": won_fmt(r["기초금액"]),
         "clse": (r["마감"] or "").strip(), "dday": dday(r["마감"]),
-        "kw": r["키워드"], "no": r["공고번호"], "url": r["상세"],
+        "kw": r["키워드"], "no": no, "url": r["상세"],
+        "report": f"report_{no}.html" if no in have_report else "",
     })
 data.sort(key=lambda x: (x["grade"] != "S", -x["amt"]))
 nS = sum(1 for d in data if d["grade"] == "S")
@@ -151,6 +156,12 @@ tbody tr:hover{background:#FBFAF8}
 .name{font-weight:600;color:var(--ink);text-decoration:none;letter-spacing:-.01em;font-size:13.5px}
 .name:hover{color:var(--accent);text-decoration:underline}
 .org{color:var(--muted);font-size:11.5px;margin-top:3px}
+.rlinks{margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rlink{font-size:11.5px;font-weight:700;color:var(--gn);text-decoration:none;background:var(--gn-bg);padding:2px 8px;border-radius:6px}
+.rlink:hover{text-decoration:underline}
+.rnone{font-size:11px;color:var(--muted)}
+.glink{font-size:11px;color:var(--muted);text-decoration:none}
+.glink:hover{color:var(--accent);text-decoration:underline}
 .amt{font-weight:700;font-size:15px;white-space:nowrap}
 .kw{color:var(--muted);font-size:11px}
 .clse{font-weight:600;font-size:12.5px}
@@ -287,10 +298,17 @@ function render(){
  document.getElementById('tb').innerHTML = rows.map(d=>{
    const near=d.dday!==null&&d.dday>=0&&d.dday<=10;
    const ddTxt=d.dday===null?'':(d.dday<0?'마감':'D-'+d.dday);
+   const nameHref = d.report ? d.report : d.url;
+   const nameTgt = d.report ? '' : 'target="_blank" rel="noopener"';
+   const links = (d.report
+       ? `<a class="rlink" href="${d.report}">과업분석 보고서 →</a> `
+       : `<span class="rnone">분석 준비중</span> `)
+     + `<a class="glink" href="${d.url}" target="_blank" rel="noopener">나라장터 원문 ↗</a>`;
    return `<tr>
     <td><span class="g g-${d.grade}">${d.grade}</span></td>
-    <td><a class="name" href="${d.url}" target="_blank" rel="noopener">${esc(d.name)}</a>
-        <div class="org">${esc(d.org)}</div></td>
+    <td><a class="name" href="${nameHref}" ${nameTgt}>${esc(d.name)}</a>
+        <div class="org">${esc(d.org)}</div>
+        <div class="rlinks">${links}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${near?'near':''}">${ddTxt}</div></td>
     <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
