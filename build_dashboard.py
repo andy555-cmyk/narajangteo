@@ -179,6 +179,7 @@ tbody tr:hover{background:#FBFAF8}
 <h1>수주 타깃 공고 대시보드</h1>
 <div class="sub">스캔 기간 <b>__PERIOD__</b> · 전체 용역공고 <b class="mono">__RAW__</b>건 →
  필터 채택 <b class="mono">__N__</b>건 · 생성 __GEN__</div>
+<div style="margin:14px 0 -4px"><a href="reports.html" style="display:inline-block;padding:9px 16px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px">과업분석 보고서 모음 (적극·조건부·보류) →</a></div>
 
 <div class="kpis">
  <div class="kpi hero">
