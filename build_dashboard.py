@@ -156,12 +156,22 @@ tbody tr:hover{background:#FBFAF8}
 .name{font-weight:600;color:var(--ink);text-decoration:none;letter-spacing:-.01em;font-size:13.5px}
 .name:hover{color:var(--accent);text-decoration:underline}
 .org{color:var(--muted);font-size:11.5px;margin-top:3px}
-.rlinks{margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.rlink{font-size:11.5px;font-weight:700;color:var(--gn);text-decoration:none;background:var(--gn-bg);padding:2px 8px;border-radius:6px}
-.rlink:hover{text-decoration:underline}
-.rnone{font-size:11px;color:var(--muted)}
-.glink{font-size:11px;color:var(--muted);text-decoration:none}
-.glink:hover{color:var(--accent);text-decoration:underline}
+.name{cursor:default}
+.rlinks{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn-report{font-family:inherit;font-size:12px;font-weight:700;color:#fff;background:var(--accent);border:0;padding:6px 13px;border-radius:8px;cursor:pointer;transition:.12s}
+.btn-report:hover{filter:brightness(.94)}
+.btn-g2b{font-size:12px;font-weight:600;color:var(--ink2);text-decoration:none;background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:8px}
+.btn-g2b:hover{border-color:var(--accent);color:var(--accent)}
+.btn-wait{font-size:12px;font-weight:600;color:var(--muted);background:#F1EFEB;padding:6px 12px;border-radius:8px}
+/* 보고서 팝업(모달) */
+.modal{position:fixed;inset:0;background:rgba(20,18,16,.55);display:none;z-index:200;align-items:center;justify-content:center;padding:24px}
+.modal.open{display:flex}
+.modalbox{background:#fff;border-radius:16px;width:min(860px,96vw);height:92vh;position:relative;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+.mbar{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 10px 0 18px;border-bottom:1px solid var(--line);background:#FAF9F7}
+.mbar .mt{font-size:12.5px;font-weight:700;color:var(--ink2)}
+.mclose{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 13px;cursor:pointer}
+.mclose:hover{border-color:var(--accent);color:var(--accent)}
+.modalbox iframe{width:100%;height:calc(92vh - 46px);border:0;background:#EDECE8}
 .amt{font-weight:700;font-size:15px;white-space:nowrap}
 .kw{color:var(--muted);font-size:11px}
 .clse{font-weight:600;font-size:12.5px}
@@ -273,6 +283,13 @@ tbody tr:hover{background:#FBFAF8}
 </div>
 </div>
 
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+ <div class="modalbox">
+   <div class="mbar"><span class="mt">과업분석 보고서</span><button class="mclose" onclick="closeModal()">닫기 ✕</button></div>
+   <iframe id="mframe" src="about:blank"></iframe>
+ </div>
+</div>
+
 <script>
 const DATA = __DATA__;
 const F = {grade:"", rfp:"", region:""};
@@ -298,17 +315,16 @@ function render(){
  document.getElementById('tb').innerHTML = rows.map(d=>{
    const near=d.dday!==null&&d.dday>=0&&d.dday<=10;
    const ddTxt=d.dday===null?'':(d.dday<0?'마감':'D-'+d.dday);
-   const nameHref = d.report ? d.report : d.url;
-   const nameTgt = d.report ? '' : 'target="_blank" rel="noopener"';
-   const links = (d.report
-       ? `<a class="rlink" href="${d.report}">과업분석 보고서 →</a> `
-       : `<span class="rnone">분석 준비중</span> `)
-     + `<a class="glink" href="${d.url}" target="_blank" rel="noopener">나라장터 원문 ↗</a>`;
+   const rbtn = d.report
+       ? `<button class="btn-report" onclick="openReport('${d.no}',this)">과업분석 보고서</button>`
+       : `<span class="btn-wait">분석 준비중</span>`;
+   const gbtn = `<a class="btn-g2b" href="${d.url}" target="_blank" rel="noopener">나라장터 ↗</a>`;
+   const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    return `<tr>
     <td><span class="g g-${d.grade}">${d.grade}</span></td>
-    <td><a class="name" href="${nameHref}" ${nameTgt}>${esc(d.name)}</a>
+    <td><span class="name" ${nameClick}>${esc(d.name)}</span>
         <div class="org">${esc(d.org)}</div>
-        <div class="rlinks">${links}</div></td>
+        <div class="rlinks">${rbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${near?'near':''}">${ddTxt}</div></td>
     <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
@@ -319,6 +335,11 @@ function render(){
  document.getElementById('empty').style.display = rows.length?'none':'block';
 }
 function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function openReport(no){document.getElementById('mframe').src='report_'+no+'.html';
+ document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modal').classList.remove('open');
+ document.getElementById('mframe').src='about:blank';document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 render();
 </script>
 </body></html>"""
