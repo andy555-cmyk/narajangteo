@@ -64,11 +64,13 @@ try:
     store = json.load(open("store.json", encoding="utf-8")) if store_existed else {}
 except Exception:
     store = {}
+# 이전 실행에 '오늘보다 과거' 기록이 있어야 NEW 판정 시작 → seed일(전부 오늘) & 같은날 재실행엔 NEW 없음
+has_history = any(v < TODAY for v in store.values())
 new_store = {}
 for d in data:
-    fs = store.get(d["no"], TODAY)
+    fs = store.get(d["no"], TODAY)   # 처음 보는 공고면 오늘로 기록
     new_store[d["no"]] = fs
-    d["isNew"] = bool(store_existed and fs == TODAY)  # 첫 실행(seed)엔 NEW 표시 안 함
+    d["isNew"] = bool(has_history and fs == TODAY)
 json.dump(new_store, open("store.json", "w", encoding="utf-8"), ensure_ascii=False)
 
 nGo = sum(1 for d in data if d["verdict"] == "적극 검토")
