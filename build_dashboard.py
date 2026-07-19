@@ -441,4 +441,5 @@ HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS)
             .replace("__NNEW__", str(nNew))
             .replace("__NREGION__", str(nRegion)).replace("__MAXAMT__", maxAmt))
 open("g2b_dashboard.html", "w", encoding="utf-8").write(HTML)
-print(f"g2b_dashboard.html 생성 · 채택 {len(data)} / STRONG {nS} / 자동추출 {nAuto} / 부울경 {nRegion}")
+print(f"g2b_dashboard.html 생성 · 채택 {len(data)} / 적극검토 {nGo} / 조건부 {nCond} / "
+      f"마감임박(D-7) {nNear} / 신규(NEW) {nNew} / 부울경 {nRegion} / 자동추출 {nAuto}")
