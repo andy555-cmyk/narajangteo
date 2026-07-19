@@ -55,9 +55,26 @@ for r in rows:
     })
 # 판정 우선 → 금액순 (붙을 것부터 위로)
 data.sort(key=lambda x: (VRANK.get(x["verdict"], 3), -x["amt"]))
+
+# 신규(NEW) 추적: store.json에 공고 첫 등장일 기록 → 오늘 처음 뜬 공고 표시
+import os
+TODAY = (GEN_AT or "")[:10]
+store_existed = os.path.exists("store.json")
+try:
+    store = json.load(open("store.json", encoding="utf-8")) if store_existed else {}
+except Exception:
+    store = {}
+new_store = {}
+for d in data:
+    fs = store.get(d["no"], TODAY)
+    new_store[d["no"]] = fs
+    d["isNew"] = bool(store_existed and fs == TODAY)  # 첫 실행(seed)엔 NEW 표시 안 함
+json.dump(new_store, open("store.json", "w", encoding="utf-8"), ensure_ascii=False)
+
 nGo = sum(1 for d in data if d["verdict"] == "적극 검토")
 nCond = sum(1 for d in data if d["verdict"] == "조건부 검토")
 nNear = sum(1 for d in data if d["dday"] is not None and 0 <= d["dday"] <= 7)
+nNew = sum(1 for d in data if d["isNew"])
 nS = sum(1 for d in data if d["grade"] == "S")
 nAuto = sum(1 for d in data if d["rfp"] == "자동추출")
 nRegion = sum(1 for d in data if d["region"])
@@ -197,6 +214,14 @@ tbody tr:hover{background:#FBFAF8}
 .g{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700}
 .g-S{background:var(--ink);color:#fff}
 .g-W{background:#F0EEEA;color:var(--muted)}
+/* 신규(NEW) 뱃지 */
+.newb{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9.5px;font-weight:800;letter-spacing:.04em;
+ background:var(--accent);color:#fff;vertical-align:middle;animation:newpulse 1.8s ease-in-out infinite}
+@keyframes newpulse{0%,100%{box-shadow:0 0 0 0 rgba(233,102,58,.45)}50%{box-shadow:0 0 0 4px rgba(233,102,58,0)}}
+/* 마감 임박 강조 */
+.dd.urgent{color:var(--rd);font-weight:800}
+tr.urgent-row td{background:var(--rd-bg)!important}
+.dtag{display:inline-block;margin-top:3px;padding:1px 6px;border-radius:5px;font-size:9.5px;font-weight:800;background:var(--rd);color:#fff}
 /* 판정 뱃지 */
 .vb{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:11.5px;font-weight:700;white-space:nowrap}
 .vb .vd{width:8px;height:8px;border-radius:50%}
@@ -233,7 +258,8 @@ tbody tr:hover{background:#FBFAF8}
  <span>오늘의 액션 →</span>
  <span><b class="go mono">__NGO__</b> 건 적극 검토</span><span class="sep">·</span>
  <span><b class="cond mono">__NCOND__</b> 건 조건부</span><span class="sep">·</span>
- <span>마감 D-7 이내 <b class="near mono">__NNEAR__</b> 건</span>
+ <span>마감 D-7 이내 <b class="near mono">__NNEAR__</b> 건</span><span class="sep">·</span>
+ <span>오늘 신규 <b class="mono" style="color:var(--accent)">__NNEW__</b> 건</span>
  <span style="color:var(--muted);font-size:12px">— 판정순 정렬, 위에서부터 공략</span>
 </div>
 
@@ -298,6 +324,10 @@ tbody tr:hover{background:#FBFAF8}
    <span class="lab" style="margin-left:8px">지역</span>
    <span class="chip on" data-k="region" data-v="">전체</span>
    <span class="chip" data-k="region" data-v="1">부울경</span>
+   <span class="lab" style="margin-left:8px">마감</span>
+   <span class="chip on" data-k="due" data-v="">전체</span>
+   <span class="chip" data-k="due" data-v="near">임박 D-7</span>
+   <span class="chip" data-k="due" data-v="new">신규 NEW</span>
  </div>
  <table>
  <thead><tr>
@@ -328,7 +358,7 @@ tbody tr:hover{background:#FBFAF8}
 
 <script>
 const DATA = __DATA__;
-const F = {verdict:"", rfp:"", region:""};
+const F = {verdict:"", rfp:"", region:"", due:""};
 let sortKey = null, sortDir = -1;   // 기본은 서버 판정순 유지, 헤더 클릭 시에만 정렬
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
  const k=c.dataset.k;
@@ -344,12 +374,16 @@ document.querySelectorAll('th.sortable').forEach(th=>th.onclick=()=>{
 });
 function render(){
  const q=(document.getElementById('q').value||"").trim().toLowerCase();
- let rows=DATA.filter(d=>
-   (!F.verdict||d.verdict===F.verdict)&&(!F.rfp||d.rfp===F.rfp)&&
-   (!F.region||d.region===true)&&(!q||(d.name+d.org).toLowerCase().includes(q)));
+ let rows=DATA.filter(d=>{
+   const near=d.dday!==null&&d.dday>=0&&d.dday<=7;
+   const dueOk = !F.due || (F.due==="near"?near : F.due==="new"?d.isNew===true : true);
+   return (!F.verdict||d.verdict===F.verdict)&&(!F.rfp||d.rfp===F.rfp)&&
+   (!F.region||d.region===true)&&dueOk&&(!q||(d.name+d.org).toLowerCase().includes(q));
+ });
  if(sortKey){rows.sort((a,b)=>{let av=a[sortKey]??-1e9,bv=b[sortKey]??-1e9;return (av<bv?-1:av>bv?1:0)*sortDir;});}
  document.getElementById('tb').innerHTML = rows.map(d=>{
-   const near=d.dday!==null&&d.dday>=0&&d.dday<=10;
+   const near=d.dday!==null&&d.dday>=0&&d.dday<=7;
+   const urgent=d.dday!==null&&d.dday>=0&&d.dday<=3;
    const ddTxt=d.dday===null?'':(d.dday<0?'마감':'D-'+d.dday);
    const rbtn = d.report
        ? `<button class="btn-report" onclick="openReport('${d.no}',this)">과업분석 보고서</button>`
@@ -358,13 +392,15 @@ function render(){
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
    const vlab=d.verdict||'미분석'; const vcls=VC[d.verdict]||'na';
-   return `<tr>
+   const newBadge = d.isNew ? '<span class="newb">NEW</span> ' : '';
+   const urgentTag = urgent ? '<span class="dtag">임박</span>' : '';
+   return `<tr class="${urgent?'urgent-row':''}">
     <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span></td>
-    <td><span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>
+    <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>
         <div class="org">${esc(d.org)}</div>
         <div class="rlinks">${rbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
-    <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${near?'near':''}">${ddTxt}</div></td>
+    <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${urgent?'urgent':near?'near':''}">${ddTxt} ${urgentTag}</div></td>
     <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
     <td class="hide-sm">${d.region?'<span class="reg">부울경</span>':''}</td>
     <td class="hide-sm"><span class="kw">${esc(d.kw)}</span></td>
@@ -402,6 +438,7 @@ HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS)
             .replace("__GEN__", GEN_AT or "-").replace("__N__", str(len(data)))
             .replace("__NS__", str(nS)).replace("__NAUTO__", str(nAuto))
             .replace("__NGO__", str(nGo)).replace("__NCOND__", str(nCond)).replace("__NNEAR__", str(nNear))
+            .replace("__NNEW__", str(nNew))
             .replace("__NREGION__", str(nRegion)).replace("__MAXAMT__", maxAmt))
 open("g2b_dashboard.html", "w", encoding="utf-8").write(HTML)
 print(f"g2b_dashboard.html 생성 · 채택 {len(data)} / STRONG {nS} / 자동추출 {nAuto} / 부울경 {nRegion}")
