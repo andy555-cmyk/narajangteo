@@ -39,12 +39,26 @@ for jf in _glob.glob("reports_data/R26BK*.json"):
         pass
 VRANK = {"적극 검토": 0, "조건부 검토": 1, "보류": 2, "": 3}
 
+# 첨부 서류(과업지시서·제안요청서·공고문) 다운로드 맵
+try:
+    ATT = json.load(open("attachments.json", encoding="utf-8"))
+except Exception:
+    ATT = {}
+
+# 참가지역 제한 게이트 판별용(우리 활동권)
+REGIONS_D = ["부산", "경남", "경상남", "경북", "경상북", "울산", "창원", "김해", "양산", "진주",
+             "포항", "구미", "안동", "남해", "거제", "통영", "기장"]
+
 rows = list(csv.DictReader(open("g2b_result.csv", encoding="utf-8-sig")))
 data = []
 for r in rows:
     try: amt = int(r["기초금액"])
     except: amt = 0
     no = r["공고번호"]
+    pr = (r.get("참가지역") or "").strip()
+    limited = bool(pr) and ("제한없음" not in pr) and ("전국" not in pr)
+    ours = any(rg in pr for rg in REGIONS_D)
+    region_gate = "block" if (limited and not ours) else ("ok" if (limited and ours) else "")
     data.append({
         "grade": r["등급"], "rfp": r["RFP"], "region": r["지역매칭"] == "Y",
         "name": r["공고명"], "org": r["수요기관"], "amt": amt, "amtLabel": won_fmt(r["기초금액"]),
@@ -52,6 +66,8 @@ for r in rows:
         "kw": r["키워드"], "no": no, "url": r["상세"],
         "report": f"report_{no}.html" if no in have_report else "",
         "verdict": verdicts.get(no, ""),
+        "docs": ATT.get(no, []),
+        "prtcpt": pr, "gate": region_gate,
     })
 # 판정 우선 → 금액순 (붙을 것부터 위로)
 data.sort(key=lambda x: (VRANK.get(x["verdict"], 3), -x["amt"]))
@@ -197,6 +213,22 @@ tbody tr:hover{background:#FBFAF8}
 .btn-g2b{font-size:12px;font-weight:600;color:var(--ink2);text-decoration:none;background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:8px}
 .btn-g2b:hover{border-color:var(--accent);color:var(--accent)}
 .btn-wait{font-size:12px;font-weight:600;color:var(--muted);background:#F1EFEB;padding:6px 12px;border-radius:8px}
+.btn-doc{font-family:inherit;font-size:12px;font-weight:600;color:var(--bl);background:var(--bl-bg);border:1px solid #CBE0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn-doc:hover{filter:brightness(.97)}
+/* 서류 다운로드 팝업 */
+.doclist{padding:8px 8px 12px;overflow-y:auto;max-height:calc(92vh - 46px)}
+.docrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin:8px;text-decoration:none;transition:.12s}
+.docrow:hover{border-color:var(--accent);background:#FBFAF8}
+.docext{flex-shrink:0;width:44px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;letter-spacing:.02em}
+.docext.pdf{background:#D6493C} .docext.hwp{background:#2B7BB0} .docext.hwpx{background:#2B7BB0}
+.docext.doc,.docext.docx{background:#2B579A} .docext.zip{background:#8C8C86} .docext.xls,.docext.xlsx{background:#2E9E5B}
+.docnm{flex:1;font-size:12.5px;font-weight:600;color:var(--ink);word-break:break-all}
+.docdl{flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--accent)}
+.docnote{font-size:11px;color:var(--muted);padding:2px 16px 10px}
+/* 지역제한 게이트 칩 */
+.gate{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;vertical-align:middle}
+.gate.block{background:var(--rd-bg);color:var(--rd)}
+.gate.ok{background:var(--bl-bg);color:var(--bl)}
 /* 보고서 팝업(모달) */
 .modal{position:fixed;inset:0;background:rgba(20,18,16,.55);display:none;z-index:200;align-items:center;justify-content:center;padding:24px}
 .modal.open{display:flex}
@@ -358,6 +390,14 @@ tr.urgent-row td{background:var(--rd-bg)!important}
  </div>
 </div>
 
+<div class="modal" id="docmodal" onclick="if(event.target===this)closeDocs()">
+ <div class="modalbox" style="height:auto;max-height:92vh">
+   <div class="mbar"><span class="mt" id="doctitle" style="max-width:640px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">첨부 서류</span><button class="mclose" onclick="closeDocs()">닫기 ✕</button></div>
+   <div class="docnote">과업지시서·제안요청서·공고문 원문입니다. 클릭하면 나라장터에서 바로 내려받습니다.</div>
+   <div class="doclist" id="doclist"></div>
+ </div>
+</div>
+
 <script>
 const DATA = __DATA__;
 const F = {verdict:"", rfp:"", region:"", due:""};
@@ -391,16 +431,19 @@ function render(){
        ? `<button class="btn-report" onclick="openReport('${d.no}',this)">과업분석 보고서</button>`
        : `<span class="btn-wait">분석 준비중</span>`;
    const gbtn = `<a class="btn-g2b" href="${d.url}" target="_blank" rel="noopener">나라장터 ↗</a>`;
+   const dbtn = (d.docs&&d.docs.length) ? `<button class="btn-doc" onclick="openDocs('${d.no}')">📎 서류 ${d.docs.length}</button>` : '';
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
    const vlab=d.verdict||'미분석'; const vcls=VC[d.verdict]||'na';
    const newBadge = d.isNew ? '<span class="newb">NEW</span> ' : '';
    const urgentTag = urgent ? '<span class="dtag">임박</span>' : '';
+   const gateChip = d.gate==='block' ? ' <span class="gate block" title="'+esc(d.prtcpt)+'">타지역 전용</span>'
+                  : d.gate==='ok' ? ' <span class="gate ok" title="'+esc(d.prtcpt)+'">지역제한</span>' : '';
    return `<tr class="${urgent?'urgent-row':''}">
     <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span></td>
-    <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>
+    <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>${gateChip}
         <div class="org">${esc(d.org)}</div>
-        <div class="rlinks">${rbtn}${gbtn}</div></td>
+        <div class="rlinks">${rbtn}${dbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${urgent?'urgent':near?'near':''}">${ddTxt} ${urgentTag}</div></td>
     <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
@@ -415,7 +458,20 @@ function openReport(no){document.getElementById('mframe').src='report_'+no+'.htm
  document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden';}
 function closeModal(){document.getElementById('modal').classList.remove('open');
  document.getElementById('mframe').src='about:blank';document.body.style.overflow='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function openDocs(no){
+ const d=DATA.find(x=>x.no===no); if(!d)return;
+ const list=(d.docs||[]).map(f=>{
+   const nm=f[0]||'첨부파일'; const url=f[1];
+   const ext=(nm.split('.').pop()||'').toLowerCase().slice(0,4);
+   return `<a class="docrow" href="${url}" target="_blank" rel="noopener">`
+     +`<span class="docext ${ext}">${(ext||'FILE').toUpperCase()}</span>`
+     +`<span class="docnm">${esc(nm)}</span><span class="docdl">내려받기 ↓</span></a>`;
+ }).join('');
+ document.getElementById('doclist').innerHTML=list||'<div style="padding:24px;color:#8C8C86;font-size:13px">첨부 서류가 없습니다.</div>';
+ document.getElementById('doctitle').textContent=d.name;
+ document.getElementById('docmodal').classList.add('open');document.body.style.overflow='hidden';}
+function closeDocs(){document.getElementById('docmodal').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();}});
 render();
 </script>
 </body></html>"""

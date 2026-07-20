@@ -7,7 +7,7 @@
 사용법:  SERVICE_KEY=발급키  python3 g2b_scan.py
 """
 import os, sys, json, csv, datetime, urllib.parse, requests
-from g2b_rfp import rfp_status   # 제안요청서 API 포함 여부 판별
+from g2b_rfp import rfp_status, attachments_of   # 제안요청서 API 포함 여부 + 첨부목록
 
 RFP_LABEL = {"RFP_API": "자동추출", "NOTICE_ONLY": "규격서별도", "NONE": "첨부없음"}
 
@@ -83,6 +83,7 @@ def main():
     print(f"전체 용역공고 {total}건 · 실제 수신 {len(items)}건\n")
 
     rows = []
+    att_map = {}          # 공고번호 → [[파일명, 다운로드URL], ...]
     seen_no = set()
     seen_name = set()
     for it in items:
@@ -126,6 +127,11 @@ def main():
         if not alive:
             continue  # 마감 지난 공고는 대시보드에서 자동 제외
         rstat, _, _ = rfp_status(it)
+        # 첨부 서류(과업지시서·제안요청서·공고문 등) 다운로드 링크 수집
+        no_key = it.get("bidNtceNo", "")
+        atts = [[n, u] for n, u in attachments_of(it) if u]
+        if atts:
+            att_map[no_key] = atts
         rows.append({
             "등급": tier,
             "RFP": RFP_LABEL.get(rstat, rstat),
@@ -168,6 +174,11 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()) if rows else ["없음"])
         w.writeheader(); w.writerows(rows)
     print(f"[저장] g2b_result.csv ({len(rows)}건)")
+
+    # 첨부 서류 다운로드 맵 저장 (대시보드 '서류' 팝업이 읽음)
+    with open("attachments.json", "w", encoding="utf-8") as f:
+        json.dump(att_map, f, ensure_ascii=False)
+    print(f"[저장] attachments.json ({len(att_map)}건 첨부 보유)")
 
     # 대시보드 자동 생성
     try:
