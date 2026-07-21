@@ -101,11 +101,24 @@ tbody tr:hover{background:#FBFAF8}
 .btn-doc:hover{filter:brightness(.97)}
 .btn-spec{font-family:inherit;font-size:12px;font-weight:600;color:#7A5AA6;background:#F1ECF8;border:1px solid #DED0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
 .btn-spec:hover{filter:brightness(.97)}
-/* 제안서 작성기준 팝업 */
-.speclist{padding:6px 6px 14px;overflow-y:auto;max-height:calc(92vh - 46px)}
-.specrow{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid var(--soft);font-size:12.5px;color:var(--ink2);line-height:1.55}
-.specrow:before{content:"";flex-shrink:0;width:5px;height:5px;border-radius:50%;background:#7A5AA6;margin-top:8px}
-.spechd{font-size:12px;color:var(--muted);padding:10px 16px 4px;line-height:1.6}
+/* 제안서 작성기준 팝업 — 재설계(핵심값 칩 + 분류 카드) */
+.speclist{padding:16px 18px 22px;overflow-y:auto;max-height:calc(92vh - 46px);background:#FAF9F7}
+.spechd{font-size:12px;color:var(--muted);padding:12px 18px 4px;line-height:1.6}
+.speckey{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.keycard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.keycard .kl{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.keycard .kv{font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.keycard.hl{background:linear-gradient(135deg,#7A5AA6,#9575BE);border:0}
+.keycard.hl .kl{color:rgba(255,255,255,.85)} .keycard.hl .kv{color:#fff}
+.specsec{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.specsec .sh{display:flex;align-items:center;gap:9px;padding:12px 16px;font-size:13px;font-weight:800;letter-spacing:-.01em;color:var(--ink);border-bottom:1px solid var(--soft)}
+.specsec .sh .sd{width:9px;height:9px;border-radius:3px}
+.specsec .sh .sc{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted)}
+.specsec ul{list-style:none;padding:6px 8px 10px}
+.specsec li{position:relative;padding:7px 12px 7px 24px;font-size:12.5px;line-height:1.6;color:var(--ink2);border-radius:8px}
+.specsec li:hover{background:var(--soft)}
+.specsec li:before{content:"";position:absolute;left:11px;top:14px;width:5px;height:5px;border-radius:50%;background:var(--sc,#7A5AA6);opacity:.55}
+.specsec li b{color:var(--ink);font-weight:700}
 /* 서류 다운로드 팝업 */
 .doclist{padding:8px 8px 12px;overflow-y:auto;max-height:calc(92vh - 46px)}
 .docrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin:8px;text-decoration:none;transition:.12s}
@@ -191,7 +204,7 @@ tr.urgent-row td{background:var(--rd-bg)!important}
 <div class="eyebrow">나라장터 · 공공디자인 공고 스캔</div>
 <h1>수주 타깃 공고 대시보드</h1>
 <div class="sub">스캔 기간 <b>2026-06-21 ~ 07-21</b> · 전체 용역공고 <b class="mono">14460</b>건 →
- 필터 채택 <b class="mono">37</b>건 · 생성 2026-07-21 11:29</div>
+ 필터 채택 <b class="mono">37</b>건 · 생성 2026-07-21 15:00</div>
 <div style="margin:14px 0 -4px"><a href="reports.html" style="display:inline-block;padding:9px 16px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px">과업분석 보고서 모음 (적극·조건부·보류) →</a></div>
 <details class="kwbox"><summary>🔎 이 대시보드가 자동으로 긁는 검색 키워드 <b style="color:var(--accent)">61</b>개 <span class="cta">펼쳐보기 ▾</span></summary><div class="kwbody"><div class="kwrow"><div class="kwlab">핵심 키워드 · 1개만 걸려도 채택 (45)</div><span class="kchip s">공공디자인</span><span class="kchip s">경관</span><span class="kchip s">유니버설디자인</span><span class="kchip s">유니버설 디자인</span><span class="kchip s">서비스디자인</span><span class="kchip s">서비스 디자인</span><span class="kchip s">웨이파인딩</span><span class="kchip s">사인</span><span class="kchip s">안내체계</span><span class="kchip s">안내표지</span><span class="kchip s">표지판</span><span class="kchip s">환경디자인</span><span class="kchip s">공공미술</span><span class="kchip s">도시브랜딩</span><span class="kchip s">도시브랜드</span><span class="kchip s">도시디자인</span><span class="kchip s">도시재생</span><span class="kchip s">색채</span><span class="kchip s">야간경관</span><span class="kchip s">경관계획</span><span class="kchip s">가로환경</span><span class="kchip s">가로경관</span><span class="kchip s">디자인클러스터</span><span class="kchip s">디자인 클러스터</span><span class="kchip s">디자인혁신</span><span class="kchip s">디자인 혁신</span><span class="kchip s">디자인진흥</span><span class="kchip s">공간디자인</span><span class="kchip s">브랜드아이덴티티</span><span class="kchip s">브랜드 아이덴티티</span><span class="kchip s">슬로건</span><span class="kchip s">정체성</span><span class="kchip s">도시계획</span><span class="kchip s">도시재생뉴딜</span><span class="kchip s">우리동네살리기</span><span class="kchip s">새뜰마을</span><span class="kchip s">마을만들기</span><span class="kchip s">마을가꾸기</span><span class="kchip s">생활SOC</span><span class="kchip s">지역재생</span><span class="kchip s">소규모재생</span><span class="kchip s">도시활력</span><span class="kchip s">주민공동체</span><span class="kchip s">빈집</span><span class="kchip s">골목상권</span></div><div class="kwrow"><div class="kwlab">보조 키워드 · 2개 이상 겹치면 채택 (16)</div><span class="kchip w">디자인</span><span class="kchip w">브랜딩</span><span class="kchip w">브랜드</span><span class="kchip w">가이드라인</span><span class="kchip w">매뉴얼</span><span class="kchip w">편집디자인</span><span class="kchip w">굿즈</span><span class="kchip w">캐릭터</span><span class="kchip w">콘텐츠</span><span class="kchip w">전시</span><span class="kchip w">체험</span><span class="kchip w">인쇄</span><span class="kchip w">홍보물</span><span class="kchip w">리플렛</span><span class="kchip w">브로슈어</span><span class="kchip w">활성화</span></div><div class="kwrow"><div class="kwlab">제외 키워드 · 이 단어가 있으면 자동 제외 (71)</div><span class="kchip n">임대</span><span class="kchip n">렌탈</span><span class="kchip n">리스</span><span class="kchip n">유지보수</span><span class="kchip n">유지관리</span><span class="kchip n">수학여행</span><span class="kchip n">수련</span><span class="kchip n">급식</span><span class="kchip n">CT</span><span class="kchip n">MRI</span><span class="kchip n">진단</span><span class="kchip n">의료</span><span class="kchip n">병원</span><span class="kchip n">환자</span><span class="kchip n">약품</span><span class="kchip n">시약</span><span class="kchip n">청소</span><span class="kchip n">경비</span><span class="kchip n">방역</span><span class="kchip n">소독</span><span class="kchip n">수목</span><span class="kchip n">제초</span><span class="kchip n">보험</span><span class="kchip n">실시설계</span><span class="kchip n">건축설계</span><span class="kchip n">구조설계</span><span class="kchip n">감리</span><span class="kchip n">측량</span><span class="kchip n">전기공사</span><span class="kchip n">통신공사</span><span class="kchip n">관급</span><span class="kchip n">차량</span><span class="kchip n">연료</span><span class="kchip n">냉난방</span><span class="kchip n">소프트웨어</span><span class="kchip n">시스템 유지</span><span class="kchip n">정보화</span><span class="kchip n">전산</span><span class="kchip n">임차</span><span class="kchip n">물품구매</span><span class="kchip n">철거</span><span class="kchip n">폐기물</span><span class="kchip n">정산 용역</span><span class="kchip n">굴착</span><span class="kchip n">포장공사</span><span class="kchip n">체험학습</span><span class="kchip n">현장체험학습</span><span class="kchip n">숙박형</span><span class="kchip n">수련활동</span><span class="kchip n">키오스크</span><span class="kchip n">배리어프리</span><span class="kchip n">환경관리</span><span class="kchip n">대기오염</span><span class="kchip n">측정·분석</span><span class="kchip n">측정분석</span><span class="kchip n">수질</span><span class="kchip n">소음</span><span class="kchip n">악취</span><span class="kchip n">자동측정</span><span class="kchip n">오염물질</span><span class="kchip n">도시계획도로</span><span class="kchip n">건설사업관리</span><span class="kchip n">통합건설</span><span class="kchip n">사업관리용역</span><span class="kchip n">감리용역</span><span class="kchip n">거리축제</span><span class="kchip n">축제 운영</span><span class="kchip n">축제운영</span><span class="kchip n">행사대행</span><span class="kchip n">행사 운영</span><span class="kchip n">행사운영</span></div><div class="kwmeta">지역 태깅: 부산, 경남, 경상남, 경북, 경상북, 울산, 창원, 김해 등 · 기초금액 하한 <b>5,000만원</b> · 최근 <b>30일</b> 게시분 중 진행중(마감 전)만 · 키워드 추가·수정은 스캐너(g2b_scan.py)에서 관리</div></div></details>
 
@@ -396,10 +409,38 @@ function openDocs(no){
  document.getElementById('doctitle').textContent=d.name;
  document.getElementById('docmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeDocs(){document.getElementById('docmodal').classList.remove('open');document.body.style.overflow='';}
+function cleanSpec(s){return (s||'').replace(/^(※|[-•·]|[①-⑮]|[Ⅰ-Ⅹ]\.|\d+[.)]|\d+\)|[가-힣][.)])\s*/,'').trim();}
 function openSpec(no){
  const d=DATA.find(x=>x.no===no); if(!d)return;
- const list=(d.spec||[]).map(s=>`<div class="specrow">${esc(s)}</div>`).join('');
- document.getElementById('speclist').innerHTML=list||'<div style="padding:24px;color:#8C8C86;font-size:13px">작성 기준을 찾지 못했습니다. 원문(서류)을 확인하세요.</div>';
+ const lines=(d.spec||[]).map(cleanSpec).filter(x=>x.length>3);
+ const joined=lines.join('  ');
+ // 핵심값 뽑기
+ const key=[];
+ const pan=joined.match(/A3|A4/i), dir=joined.match(/(가로|세로)[\s'"‘’“”]*로?[\s'"‘’“”]*(?:작성|규격|방향)/);
+ const dirTxt=dir?dir[1]:'';
+ if(pan) key.push(['판형', pan[0].toUpperCase()+(dirTxt?(' · '+dirTxt):'')]);
+ const mae=joined.match(/(\d+)\s*매\s*이내/); if(mae) key.push(['분량', mae[1]+'매 이내']);
+ const ins=joined.match(/(양면|단면)\s*인쇄|(단면|양면)/); if(ins) key.push(['인쇄', (ins[1]||ins[2])]);
+ const usb=joined.match(/USB\s*(\d+)\s*매/); if(usb) key.push(['제출', 'USB '+usb[1]+'매']);
+ // 분류
+ const cats={규격:[],제출:[],평가:[],유의:[]};
+ for(const ln of lines){
+   if(/평가|배점|정성|정량|가격제안|심사|적격|커트/.test(ln)) cats.평가.push(ln);
+   else if(/제출|부수|USB|마감|장소|등재|공공구매|반환|우편|방문/.test(ln)) cats.제출.push(ln);
+   else if(/A3|A4|가로|세로|판형|규격|매\s*이내|\d+\s*매|쪽|면수|표지|목차|제본|인쇄|좌철|백상지|아트지|용지|글꼴|폰트|간지/.test(ln)) cats.규격.push(ln);
+   else cats.유의.push(ln);
+ }
+ const SEC=[['규격','제안서 규격·판형','#7A5AA6'],['제출','제출 방법·부수','#2B7BB0'],['평가','평가·배점','#E9663A'],['유의','작성 유의사항','#C6871F']];
+ let html='';
+ if(key.length){
+   html+='<div class="speckey">'+key.map((k,i)=>`<div class="keycard${i===0?' hl':''}"><div class="kl">${k[0]}</div><div class="kv">${esc(k[1])}</div></div>`).join('')+'</div>';
+ }
+ for(const [k,label,color] of SEC){
+   const arr=cats[k]; if(!arr.length) continue;
+   html+=`<div class="specsec"><div class="sh"><span class="sd" style="background:${color}"></span>${label}<span class="sc">${arr.length}</span></div><ul style="--sc:${color}">`
+     + arr.map(x=>`<li>${esc(x)}</li>`).join('') + '</ul></div>';
+ }
+ document.getElementById('speclist').innerHTML=html||'<div style="padding:24px;color:#8C8C86;font-size:13px">작성 기준을 찾지 못했습니다. 원문(서류)을 확인하세요.</div>';
  document.getElementById('spectitle').textContent=d.name;
  document.getElementById('specmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeSpec(){document.getElementById('specmodal').classList.remove('open');document.body.style.overflow='';}

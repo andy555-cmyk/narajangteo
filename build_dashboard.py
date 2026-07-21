@@ -230,11 +230,24 @@ tbody tr:hover{background:#FBFAF8}
 .btn-doc:hover{filter:brightness(.97)}
 .btn-spec{font-family:inherit;font-size:12px;font-weight:600;color:#7A5AA6;background:#F1ECF8;border:1px solid #DED0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
 .btn-spec:hover{filter:brightness(.97)}
-/* 제안서 작성기준 팝업 */
-.speclist{padding:6px 6px 14px;overflow-y:auto;max-height:calc(92vh - 46px)}
-.specrow{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid var(--soft);font-size:12.5px;color:var(--ink2);line-height:1.55}
-.specrow:before{content:"";flex-shrink:0;width:5px;height:5px;border-radius:50%;background:#7A5AA6;margin-top:8px}
-.spechd{font-size:12px;color:var(--muted);padding:10px 16px 4px;line-height:1.6}
+/* 제안서 작성기준 팝업 — 재설계(핵심값 칩 + 분류 카드) */
+.speclist{padding:16px 18px 22px;overflow-y:auto;max-height:calc(92vh - 46px);background:#FAF9F7}
+.spechd{font-size:12px;color:var(--muted);padding:12px 18px 4px;line-height:1.6}
+.speckey{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.keycard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.keycard .kl{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.keycard .kv{font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.keycard.hl{background:linear-gradient(135deg,#7A5AA6,#9575BE);border:0}
+.keycard.hl .kl{color:rgba(255,255,255,.85)} .keycard.hl .kv{color:#fff}
+.specsec{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.specsec .sh{display:flex;align-items:center;gap:9px;padding:12px 16px;font-size:13px;font-weight:800;letter-spacing:-.01em;color:var(--ink);border-bottom:1px solid var(--soft)}
+.specsec .sh .sd{width:9px;height:9px;border-radius:3px}
+.specsec .sh .sc{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted)}
+.specsec ul{list-style:none;padding:6px 8px 10px}
+.specsec li{position:relative;padding:7px 12px 7px 24px;font-size:12.5px;line-height:1.6;color:var(--ink2);border-radius:8px}
+.specsec li:hover{background:var(--soft)}
+.specsec li:before{content:"";position:absolute;left:11px;top:14px;width:5px;height:5px;border-radius:50%;background:var(--sc,#7A5AA6);opacity:.55}
+.specsec li b{color:var(--ink);font-weight:700}
 /* 서류 다운로드 팝업 */
 .doclist{padding:8px 8px 12px;overflow-y:auto;max-height:calc(92vh - 46px)}
 .docrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin:8px;text-decoration:none;transition:.12s}
@@ -516,10 +529,38 @@ function openDocs(no){
  document.getElementById('doctitle').textContent=d.name;
  document.getElementById('docmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeDocs(){document.getElementById('docmodal').classList.remove('open');document.body.style.overflow='';}
+function cleanSpec(s){return (s||'').replace(/^(※|[-•·]|[①-⑮]|[Ⅰ-Ⅹ]\.|\d+[.)]|\d+\)|[가-힣][.)])\s*/,'').trim();}
 function openSpec(no){
  const d=DATA.find(x=>x.no===no); if(!d)return;
- const list=(d.spec||[]).map(s=>`<div class="specrow">${esc(s)}</div>`).join('');
- document.getElementById('speclist').innerHTML=list||'<div style="padding:24px;color:#8C8C86;font-size:13px">작성 기준을 찾지 못했습니다. 원문(서류)을 확인하세요.</div>';
+ const lines=(d.spec||[]).map(cleanSpec).filter(x=>x.length>3);
+ const joined=lines.join('  ');
+ // 핵심값 뽑기
+ const key=[];
+ const pan=joined.match(/A3|A4/i), dir=joined.match(/(가로|세로)[\s'"‘’“”]*로?[\s'"‘’“”]*(?:작성|규격|방향)/);
+ const dirTxt=dir?dir[1]:'';
+ if(pan) key.push(['판형', pan[0].toUpperCase()+(dirTxt?(' · '+dirTxt):'')]);
+ const mae=joined.match(/(\d+)\s*매\s*이내/); if(mae) key.push(['분량', mae[1]+'매 이내']);
+ const ins=joined.match(/(양면|단면)\s*인쇄|(단면|양면)/); if(ins) key.push(['인쇄', (ins[1]||ins[2])]);
+ const usb=joined.match(/USB\s*(\d+)\s*매/); if(usb) key.push(['제출', 'USB '+usb[1]+'매']);
+ // 분류
+ const cats={규격:[],제출:[],평가:[],유의:[]};
+ for(const ln of lines){
+   if(/평가|배점|정성|정량|가격제안|심사|적격|커트/.test(ln)) cats.평가.push(ln);
+   else if(/제출|부수|USB|마감|장소|등재|공공구매|반환|우편|방문/.test(ln)) cats.제출.push(ln);
+   else if(/A3|A4|가로|세로|판형|규격|매\s*이내|\d+\s*매|쪽|면수|표지|목차|제본|인쇄|좌철|백상지|아트지|용지|글꼴|폰트|간지/.test(ln)) cats.규격.push(ln);
+   else cats.유의.push(ln);
+ }
+ const SEC=[['규격','제안서 규격·판형','#7A5AA6'],['제출','제출 방법·부수','#2B7BB0'],['평가','평가·배점','#E9663A'],['유의','작성 유의사항','#C6871F']];
+ let html='';
+ if(key.length){
+   html+='<div class="speckey">'+key.map((k,i)=>`<div class="keycard${i===0?' hl':''}"><div class="kl">${k[0]}</div><div class="kv">${esc(k[1])}</div></div>`).join('')+'</div>';
+ }
+ for(const [k,label,color] of SEC){
+   const arr=cats[k]; if(!arr.length) continue;
+   html+=`<div class="specsec"><div class="sh"><span class="sd" style="background:${color}"></span>${label}<span class="sc">${arr.length}</span></div><ul style="--sc:${color}">`
+     + arr.map(x=>`<li>${esc(x)}</li>`).join('') + '</ul></div>';
+ }
+ document.getElementById('speclist').innerHTML=html||'<div style="padding:24px;color:#8C8C86;font-size:13px">작성 기준을 찾지 못했습니다. 원문(서류)을 확인하세요.</div>';
  document.getElementById('spectitle').textContent=d.name;
  document.getElementById('specmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeSpec(){document.getElementById('specmodal').classList.remove('open');document.body.style.overflow='';}
