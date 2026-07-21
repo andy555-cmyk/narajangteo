@@ -45,6 +45,12 @@ try:
 except Exception:
     ATT = {}
 
+# 검색 키워드 프로파일 (대시보드에 '무엇으로 긁는지' 표시)
+try:
+    KWP = json.load(open("keywords.json", encoding="utf-8"))
+except Exception:
+    KWP = {"strong": [], "weak": [], "neg": [], "regions": [], "min_amt": 0, "days_back": 0}
+
 # 참가지역 제한 게이트 판별용(우리 활동권)
 REGIONS_D = ["부산", "경남", "경상남", "경북", "경상북", "울산", "창원", "김해", "양산", "진주",
              "포항", "구미", "안동", "남해", "거제", "통영", "기장"]
@@ -229,6 +235,21 @@ tbody tr:hover{background:#FBFAF8}
 .gate{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;vertical-align:middle}
 .gate.block{background:var(--rd-bg);color:var(--rd)}
 .gate.ok{background:var(--bl-bg);color:var(--bl)}
+/* 검색 키워드 패널 */
+.kwbox{margin:16px 0 0;background:var(--card);border:1px solid var(--line);border-radius:14px;
+ box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 26px -18px rgba(0,0,0,.12)}
+.kwbox summary{cursor:pointer;list-style:none;padding:14px 18px;font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.kwbox summary::-webkit-details-marker{display:none}
+.kwbox summary .cta{margin-left:auto;font-size:11.5px;color:var(--muted);font-weight:500}
+.kwbox[open] summary .cta{color:var(--accent)}
+.kwbody{padding:0 18px 16px}
+.kwrow{margin:12px 0}
+.kwlab{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em;margin-bottom:7px}
+.kchip{display:inline-block;margin:3px 5px 0 0;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600}
+.kchip.s{background:var(--accent-soft);color:var(--accent)}
+.kchip.w{background:#F1EFEB;color:var(--ink2)}
+.kchip.n{background:var(--rd-bg);color:var(--rd)}
+.kwmeta{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.7;border-top:1px solid var(--line);padding-top:11px}
 /* 보고서 팝업(모달) */
 .modal{position:fixed;inset:0;background:rgba(20,18,16,.55);display:none;z-index:200;align-items:center;justify-content:center;padding:24px}
 .modal.open{display:flex}
@@ -287,6 +308,7 @@ tr.urgent-row td{background:var(--rd-bg)!important}
 <div class="sub">스캔 기간 <b>__PERIOD__</b> · 전체 용역공고 <b class="mono">__RAW__</b>건 →
  필터 채택 <b class="mono">__N__</b>건 · 생성 __GEN__</div>
 <div style="margin:14px 0 -4px"><a href="reports.html" style="display:inline-block;padding:9px 16px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px">과업분석 보고서 모음 (적극·조건부·보류) →</a></div>
+__KWPANEL__
 
 <div class="brief">
  <span>오늘의 액션 →</span>
@@ -490,7 +512,27 @@ def bars(stat, maxn, colored=False):
 KWBARS = bars(KW_STAT, kw_max, colored=False)
 RFPBARS = bars(RFP_STAT, max((s["n"] for s in RFP_STAT), default=1), colored=True)
 
-HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS)
+# 검색 키워드 패널
+import html as _html
+def _kc(lst, cls):
+    return "".join('<span class="kchip %s">%s</span>' % (cls, _html.escape(str(k))) for k in lst)
+_strong = KWP.get("strong", []); _weak = KWP.get("weak", []); _neg = KWP.get("neg", [])
+_regions = KWP.get("regions", []); _minamt = KWP.get("min_amt", 0); _days = KWP.get("days_back", 0)
+KWPANEL = (
+ '<details class="kwbox"><summary>🔎 이 대시보드가 자동으로 긁는 검색 키워드 '
+ '<b style="color:var(--accent)">%d</b>개 <span class="cta">펼쳐보기 ▾</span></summary>'
+ '<div class="kwbody">'
+ '<div class="kwrow"><div class="kwlab">핵심 키워드 · 1개만 걸려도 채택 (%d)</div>%s</div>'
+ '<div class="kwrow"><div class="kwlab">보조 키워드 · 2개 이상 겹치면 채택 (%d)</div>%s</div>'
+ '<div class="kwrow"><div class="kwlab">제외 키워드 · 이 단어가 있으면 자동 제외 (%d)</div>%s</div>'
+ '<div class="kwmeta">지역 태깅: %s 등 · 기초금액 하한 <b>%s원</b> · 최근 <b>%d일</b> 게시분 중 진행중(마감 전)만 · '
+ '키워드 추가·수정은 스캐너(g2b_scan.py)에서 관리</div>'
+ '</div></details>'
+) % (len(_strong)+len(_weak), len(_strong), _kc(_strong,"s"),
+     len(_weak), _kc(_weak,"w"), len(_neg), _kc(_neg,"n"),
+     ", ".join(_regions[:8]), won_fmt(_minamt), _days)
+
+HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS).replace("__KWPANEL__", KWPANEL)
             .replace("__DATA__", json.dumps(data, ensure_ascii=False))
             .replace("__RAW__", str(RAW_TOTAL)).replace("__PERIOD__", PERIOD or "-")
             .replace("__GEN__", GEN_AT or "-").replace("__N__", str(len(data)))
