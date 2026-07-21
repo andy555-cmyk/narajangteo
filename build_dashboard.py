@@ -57,6 +57,12 @@ try:
 except Exception:
     SPECS = {}
 
+# 제안서 착수 결정 — 공고번호 → {status:"진행", figma:"url", started:"date"}
+try:
+    DECIDE = json.load(open("decisions.json", encoding="utf-8"))
+except Exception:
+    DECIDE = {}
+
 # 참가지역 제한 게이트 판별용(우리 활동권)
 REGIONS_D = ["부산", "경남", "경상남", "경북", "경상북", "울산", "창원", "김해", "양산", "진주",
              "포항", "구미", "안동", "남해", "거제", "통영", "기장"]
@@ -81,6 +87,7 @@ for r in rows:
         "docs": ATT.get(no, []),
         "prtcpt": pr, "gate": region_gate,
         "spec": SPECS.get(no, []),
+        "decided": DECIDE.get(no) or {},
     })
 # 판정 우선 → 금액순 (붙을 것부터 위로)
 data.sort(key=lambda x: (VRANK.get(x["verdict"], 3), -x["amt"]))
@@ -230,6 +237,28 @@ tbody tr:hover{background:#FBFAF8}
 .btn-doc:hover{filter:brightness(.97)}
 .btn-spec{font-family:inherit;font-size:12px;font-weight:600;color:#7A5AA6;background:#F1ECF8;border:1px solid #DED0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
 .btn-spec:hover{filter:brightness(.97)}
+/* 제안서 착수 버튼 + 진행중 상태 */
+.btn-start{font-family:inherit;font-size:12px;font-weight:800;color:#fff;background:var(--ink);border:0;padding:7px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+.btn-start:hover{background:var(--accent)}
+.btn-live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--gn);background:var(--gn-bg);border:1px solid #BDE5CD;padding:6px 12px;border-radius:8px}
+.btn-live .ld{width:8px;height:8px;border-radius:50%;background:var(--gn);animation:newpulse 1.8s ease-in-out infinite}
+.btn-figma{font-size:12px;font-weight:700;color:#fff;background:#1E1E1E;text-decoration:none;padding:6px 12px;border-radius:8px;display:inline-flex;align-items:center;gap:5px}
+.btn-figma:hover{background:var(--accent)}
+/* 착수 모달 */
+.startbox{padding:22px 24px 24px;overflow-y:auto;max-height:calc(92vh - 46px)}
+.startbox h4{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.startbox .sub{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.pipeline{display:flex;gap:8px;margin:14px 0 18px;flex-wrap:wrap}
+.pstep{flex:1;min-width:120px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.pstep .pn{font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.04em}
+.pstep .pt{font-size:12.5px;font-weight:700;color:var(--ink);margin-top:3px}
+.pstep .pd{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.cmdbox{background:#1A1A1A;color:#EDE9E2;border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;font-family:ui-monospace,monospace;margin-top:4px}
+.copyrow{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.btn-copy{font-family:inherit;font-size:13px;font-weight:800;color:#fff;background:var(--accent);border:0;padding:10px 18px;border-radius:9px;cursor:pointer}
+.btn-copy:hover{filter:brightness(.95)}
+.copyhint{font-size:11.5px;color:var(--muted)}
+.startnote{font-size:12px;color:var(--ink2);background:var(--accent-soft);border-radius:9px;padding:11px 14px;margin-top:16px;line-height:1.55}
 /* 제안서 작성기준 팝업 — 재설계(핵심값 칩 + 분류 카드) */
 .speclist{padding:16px 18px 22px;overflow-y:auto;max-height:calc(92vh - 46px);background:#FAF9F7}
 .spechd{font-size:12px;color:var(--muted);padding:12px 18px 4px;line-height:1.6}
@@ -455,6 +484,27 @@ __KWPANEL__
  </div>
 </div>
 
+<div class="modal" id="startmodal" onclick="if(event.target===this)closeStart()">
+ <div class="modalbox" style="height:auto;max-height:92vh;width:min(680px,96vw)">
+   <div class="mbar"><span class="mt">제안서 착수</span><button class="mclose" onclick="closeStart()">닫기 ✕</button></div>
+   <div class="startbox">
+     <h4 id="start-name">공고명</h4>
+     <div class="sub">이 공고를 <b>제안서 진행</b>으로 선택합니다. 아래 명령을 복사해 클로드에 붙여넣으면 골격 → 승부처 원고 → 피그마까지 이어집니다.</div>
+     <div class="pipeline">
+       <div class="pstep"><div class="pn">STEP 1</div><div class="pt">초안 골격</div><div class="pd">Win Theme·배점역산·목차·페이지 핵심메시지</div></div>
+       <div class="pstep"><div class="pn">STEP 2</div><div class="pt">승부처 원고</div><div class="pd">공간구성·기획연출 페이지별 4블록</div></div>
+       <div class="pstep"><div class="pn">STEP 3</div><div class="pt">피그마 생성</div><div class="pd">하우스 표준 레이아웃으로 제안서 조립</div></div>
+     </div>
+     <div class="cmdbox" id="start-cmd"></div>
+     <div class="copyrow">
+       <button class="btn-copy" onclick="copyCmd()">📋 진행 명령 복사</button>
+       <span class="copyhint" id="copyhint">복사해서 클로드에 붙여넣으세요.</span>
+     </div>
+     <div class="startnote">정적 대시보드라 클릭만으로 자동 생성되진 않습니다. 이 명령이 파이프라인의 트리거이고, 실행이 끝나면 이 공고는 <b>진행중</b> + 피그마 링크로 바뀝니다.</div>
+   </div>
+ </div>
+</div>
+
 <script>
 const DATA = __DATA__;
 const F = {verdict:"", rfp:"", region:"", due:""};
@@ -490,6 +540,10 @@ function render(){
    const gbtn = `<a class="btn-g2b" href="${d.url}" target="_blank" rel="noopener">나라장터 ↗</a>`;
    const dbtn = (d.docs&&d.docs.length) ? `<button class="btn-doc" onclick="openDocs('${d.no}')">📎 서류 ${d.docs.length}</button>` : '';
    const sbtn = (d.spec&&d.spec.length) ? `<button class="btn-spec" onclick="openSpec('${d.no}')">📋 작성기준</button>` : '';
+   const dec = d.decided||{};
+   const startbtn = dec.status
+       ? `<span class="btn-live"><span class="ld"></span>제안서 진행중</span>`+(dec.figma?`<a class="btn-figma" href="${dec.figma}" target="_blank" rel="noopener">피그마 ↗</a>`:'')
+       : `<button class="btn-start" onclick="openStart('${d.no}')">제안서 착수 →</button>`;
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
    const vlab=d.verdict||'미분석'; const vcls=VC[d.verdict]||'na';
@@ -501,7 +555,7 @@ function render(){
     <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span></td>
     <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>${gateChip}
         <div class="org">${esc(d.org)}</div>
-        <div class="rlinks">${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
+        <div class="rlinks">${startbtn}${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${urgent?'urgent':near?'near':''}">${ddTxt} ${urgentTag}</div></td>
     <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
@@ -529,6 +583,16 @@ function openDocs(no){
  document.getElementById('doctitle').textContent=d.name;
  document.getElementById('docmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeDocs(){document.getElementById('docmodal').classList.remove('open');document.body.style.overflow='';}
+let _cmd="";
+function openStart(no){
+ const d=DATA.find(x=>x.no===no); if(!d)return;
+ document.getElementById('start-name').textContent=d.name;
+ _cmd=`나라장터 수주 대시보드 제안서 파이프라인 착수.\n공고: ${d.name}\n공고번호: ${no}\n기초금액: ${d.amtLabel} · 마감: ${(d.clse||'').slice(0,10)}\n\n다음을 순서대로 진행: ① 초안 골격(Win Theme·배점역산·목차·페이지 핵심메시지) ② 승부처 2·3장 페이지별 4블록 원고 ③ proposal-design-system 하우스 표준으로 피그마(root.gra's team) 제안서 생성. 완료 후 이 공고를 decisions.json에 진행중+피그마링크로 기록해줘.`;
+ document.getElementById('start-cmd').textContent=_cmd;
+ document.getElementById('copyhint').textContent='복사해서 클로드에 붙여넣으세요.';
+ document.getElementById('startmodal').classList.add('open');document.body.style.overflow='hidden';}
+function closeStart(){document.getElementById('startmodal').classList.remove('open');document.body.style.overflow='';}
+function copyCmd(){navigator.clipboard.writeText(_cmd).then(()=>{document.getElementById('copyhint').textContent='✓ 복사됨 — 클로드에 붙여넣으세요.';}).catch(()=>{document.getElementById('copyhint').textContent='복사 실패 — 위 명령을 직접 선택해 복사하세요.';});}
 function cleanSpec(s){return (s||'').replace(/^(※|[-•·]|[①-⑮]|[Ⅰ-Ⅹ]\.|\d+[.)]|\d+\)|[가-힣][.)])\s*/,'').trim();}
 function openSpec(no){
  const d=DATA.find(x=>x.no===no); if(!d)return;
@@ -564,7 +628,7 @@ function openSpec(no){
  document.getElementById('spectitle').textContent=d.name;
  document.getElementById('specmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeSpec(){document.getElementById('specmodal').classList.remove('open');document.body.style.overflow='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();closeSpec();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();closeSpec();closeStart();}});
 render();
 </script>
 </body></html>"""
