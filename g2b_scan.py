@@ -7,7 +7,8 @@
 사용법:  SERVICE_KEY=발급키  python3 g2b_scan.py
 """
 import os, sys, json, csv, datetime, urllib.parse, requests
-from g2b_rfp import rfp_status, attachments_of   # 제안요청서 API 포함 여부 + 첨부목록
+from g2b_rfp import rfp_status, attachments_of, get_rfp_text   # RFP 판별·첨부·본문추출
+from g2b_spec import extract_spec                              # 제안서 작성기준(정성) 추출
 
 RFP_LABEL = {"RFP_API": "자동추출", "NOTICE_ONLY": "규격서별도", "NONE": "첨부없음"}
 
@@ -90,6 +91,7 @@ def main():
 
     rows = []
     att_map = {}          # 공고번호 → [[파일명, 다운로드URL], ...]
+    rfp_items = {}        # 공고번호 → item (자동추출 공고만; 제안서 작성기준 추출용)
     seen_no = set()
     seen_name = set()
     for it in items:
@@ -138,6 +140,8 @@ def main():
         atts = [[n, u] for n, u in attachments_of(it) if u]
         if atts:
             att_map[no_key] = atts
+        if rstat == "RFP_API":
+            rfp_items[no_key] = it
         rows.append({
             "등급": tier,
             "RFP": RFP_LABEL.get(rstat, rstat),
@@ -193,6 +197,28 @@ def main():
             "regions": REGIONS, "min_amt": MIN_AMT, "days_back": DAYS_BACK,
         }, f, ensure_ascii=False)
     print(f"[저장] keywords.json (STRONG {len(KW_STRONG)} / WEAK {len(KW_WEAK)} / NEG {len(NEG)})")
+
+    # 제안서 작성기준(정성) 추출 → specs.json. 캐시: 이미 뽑은 공고는 재다운로드 안 함(공고번호 안정).
+    try:
+        specs = json.load(open("specs.json", encoding="utf-8"))
+    except Exception:
+        specs = {}
+    keep_nos = {r["공고번호"] for r in rows}
+    specs = {k: v for k, v in specs.items() if k in keep_nos}   # 사라진 공고 정리
+    fetched = 0
+    for no_key, it in rfp_items.items():
+        if no_key in specs:            # 캐시 히트 → 스킵
+            continue
+        try:
+            res = get_rfp_text(it, key)
+            lines = extract_spec(res.get("text") or "")
+            specs[no_key] = lines
+            fetched += 1
+        except Exception as e:
+            specs[no_key] = []
+    with open("specs.json", "w", encoding="utf-8") as f:
+        json.dump(specs, f, ensure_ascii=False)
+    print(f"[저장] specs.json (제안서 작성기준 {sum(1 for v in specs.values() if v)}건 · 신규추출 {fetched})")
 
     # 대시보드 자동 생성
     try:

@@ -51,6 +51,12 @@ try:
 except Exception:
     KWP = {"strong": [], "weak": [], "neg": [], "regions": [], "min_amt": 0, "days_back": 0}
 
+# 제안서 작성기준(정성) — 공고번호 → [규격·유의사항 줄...]
+try:
+    SPECS = json.load(open("specs.json", encoding="utf-8"))
+except Exception:
+    SPECS = {}
+
 # 참가지역 제한 게이트 판별용(우리 활동권)
 REGIONS_D = ["부산", "경남", "경상남", "경북", "경상북", "울산", "창원", "김해", "양산", "진주",
              "포항", "구미", "안동", "남해", "거제", "통영", "기장"]
@@ -74,6 +80,7 @@ for r in rows:
         "verdict": verdicts.get(no, ""),
         "docs": ATT.get(no, []),
         "prtcpt": pr, "gate": region_gate,
+        "spec": SPECS.get(no, []),
     })
 # 판정 우선 → 금액순 (붙을 것부터 위로)
 data.sort(key=lambda x: (VRANK.get(x["verdict"], 3), -x["amt"]))
@@ -221,6 +228,13 @@ tbody tr:hover{background:#FBFAF8}
 .btn-wait{font-size:12px;font-weight:600;color:var(--muted);background:#F1EFEB;padding:6px 12px;border-radius:8px}
 .btn-doc{font-family:inherit;font-size:12px;font-weight:600;color:var(--bl);background:var(--bl-bg);border:1px solid #CBE0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
 .btn-doc:hover{filter:brightness(.97)}
+.btn-spec{font-family:inherit;font-size:12px;font-weight:600;color:#7A5AA6;background:#F1ECF8;border:1px solid #DED0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn-spec:hover{filter:brightness(.97)}
+/* 제안서 작성기준 팝업 */
+.speclist{padding:6px 6px 14px;overflow-y:auto;max-height:calc(92vh - 46px)}
+.specrow{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid var(--soft);font-size:12.5px;color:var(--ink2);line-height:1.55}
+.specrow:before{content:"";flex-shrink:0;width:5px;height:5px;border-radius:50%;background:#7A5AA6;margin-top:8px}
+.spechd{font-size:12px;color:var(--muted);padding:10px 16px 4px;line-height:1.6}
 /* 서류 다운로드 팝업 */
 .doclist{padding:8px 8px 12px;overflow-y:auto;max-height:calc(92vh - 46px)}
 .docrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin:8px;text-decoration:none;transition:.12s}
@@ -420,6 +434,14 @@ __KWPANEL__
  </div>
 </div>
 
+<div class="modal" id="specmodal" onclick="if(event.target===this)closeSpec()">
+ <div class="modalbox" style="height:auto;max-height:92vh">
+   <div class="mbar"><span class="mt" id="spectitle" style="max-width:640px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">제안서 작성 기준</span><button class="mclose" onclick="closeSpec()">닫기 ✕</button></div>
+   <div class="spechd">제안요청서에서 뽑은 <b>정성 제안서 작성 규격·유의사항</b>입니다(판형·매수·표지·제출방법·유의사항 등). 원문 대조 권장.</div>
+   <div class="speclist" id="speclist"></div>
+ </div>
+</div>
+
 <script>
 const DATA = __DATA__;
 const F = {verdict:"", rfp:"", region:"", due:""};
@@ -454,6 +476,7 @@ function render(){
        : `<span class="btn-wait">분석 준비중</span>`;
    const gbtn = `<a class="btn-g2b" href="${d.url}" target="_blank" rel="noopener">나라장터 ↗</a>`;
    const dbtn = (d.docs&&d.docs.length) ? `<button class="btn-doc" onclick="openDocs('${d.no}')">📎 서류 ${d.docs.length}</button>` : '';
+   const sbtn = (d.spec&&d.spec.length) ? `<button class="btn-spec" onclick="openSpec('${d.no}')">📋 작성기준</button>` : '';
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
    const vlab=d.verdict||'미분석'; const vcls=VC[d.verdict]||'na';
@@ -465,7 +488,7 @@ function render(){
     <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span></td>
     <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>${gateChip}
         <div class="org">${esc(d.org)}</div>
-        <div class="rlinks">${rbtn}${dbtn}${gbtn}</div></td>
+        <div class="rlinks">${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${urgent?'urgent':near?'near':''}">${ddTxt} ${urgentTag}</div></td>
     <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
@@ -493,7 +516,14 @@ function openDocs(no){
  document.getElementById('doctitle').textContent=d.name;
  document.getElementById('docmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeDocs(){document.getElementById('docmodal').classList.remove('open');document.body.style.overflow='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();}});
+function openSpec(no){
+ const d=DATA.find(x=>x.no===no); if(!d)return;
+ const list=(d.spec||[]).map(s=>`<div class="specrow">${esc(s)}</div>`).join('');
+ document.getElementById('speclist').innerHTML=list||'<div style="padding:24px;color:#8C8C86;font-size:13px">작성 기준을 찾지 못했습니다. 원문(서류)을 확인하세요.</div>';
+ document.getElementById('spectitle').textContent=d.name;
+ document.getElementById('specmodal').classList.add('open');document.body.style.overflow='hidden';}
+function closeSpec(){document.getElementById('specmodal').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();closeSpec();}});
 render();
 </script>
 </body></html>"""
