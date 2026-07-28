@@ -50,7 +50,9 @@ git push          # Deploy key(SSH)로 바로 나감
 - ⚠ 확정 원고 14페이지의 AI 프롬프트가 `--ar 16:9`로 끝난다 → **`--ar 99:70`으로 교체 필요.**
 - 폰트 **`S-Core Dream` · 자간 `-10`** (2026-07-28 확정, H-3).
   - ⚠ 이건 **제안서 Figma 표준**이다. **웹 대시보드의 Pretendard는 그대로 둔다** — 통일 대상이 아니다.
-  - ⚠ 자간 "-10"의 단위 미확정(Adobe 1/1000em=-1% vs Figma -10%) → 표준 1장에서 두 벌 비교 후 확정.
+  - 자간 기준 = **Figma 값 그대로 `-10`** (Adobe 1/1000em 환산 아님. 2026-07-28 Andy 확인).
+    Figma에서 맨숫자는 px로 잡히는데 본문에 -10px는 글자가 겹쳐 못 쓴다 → 실제로는 **`-10%`**로 본다.
+    표준 1장 만들 때 스크린샷으로 확인하고 확정한다.
   - ⚠ Figma에 서체가 로드되지 않으면 **조용히 대체 서체로 렌더**된다. `get_screenshot`
     (`enableBase64Response: true` 필수)으로 실제 적용 여부를 눈으로 확인하고 넘어갈 것.
 
@@ -61,8 +63,8 @@ git push          # Deploy key(SSH)로 바로 나감
    그것만 고치면 필터는 안 바뀌고 다음 스캔에 덮어써진다. (미결 H-21)
 2. **D-day 기준일을 다시 하드코딩하지 말 것.** `build_dashboard.py`의 `BASE_DATE`는 `GEN_AT` 우선 →
    `today()` 폴백이다. 과거 `date(2026,7,18)` 고정이라 마감임박 표시가 열흘간 죽어 있었다. (H-20, 해소)
-3. **로컬에서 `g2b_scan.py`는 못 돌린다** — `SERVICE_KEY` 미설정 + `requests`/`olefile`/`pdfplumber` 미설치.
-   `build_dashboard.py`만 로컬 실행 가능. (미결 H-23)
+3. **로컬 실행은 반드시 `./run.sh` 또는 `.venv/bin/python`으로.** 시스템 python(3.9)에는
+   `requests`·`olefile`·`pdfplumber`가 없어 `g2b_scan.py`가 죽는다. (H-23 해소 — 2026-07-28)
 4. 인수인계 문서의 **H-1(제안서 착수 버튼 미구현)은 오판정**이다. 커밋 `41341e0`으로 구현·배포돼 있다.
    판정 전에 `git log origin/main`으로 원격 HEAD를 먼저 확인할 것.
 5. **축제·행사 필터는 단어 하나로 자르지 말 것.** `OPS_COND × NOT CRAFT_KEEP` 조합 규칙이다.
