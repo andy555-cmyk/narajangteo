@@ -19,12 +19,27 @@ def won_fmt(v):
     if n >= 10000: return f"{n//10000:,}만"
     return f"{n:,}"
 
+import datetime as _dt
+
+# D-day 기준일. 배치가 넘겨주는 생성시각(GEN_AT)을 우선 쓴다 — 같은 입력이면 같은 HTML이
+# 나와야 재실행·재현이 가능하기 때문. GEN_AT이 없을 때만 오늘 날짜로 폴백한다.
+# ⚠ 과거에 이 값이 date(2026,7,18)로 하드코딩돼 있어 7/19부터 매일 하루씩 어긋났다.
+#   (2026-07-28 기준 전 건 D-day가 +10일 부풀려져 '마감임박' 표시가 0건으로 죽어 있었음)
+def _base_date():
+    m = re.match(r"(\d{4})-(\d{2})-(\d{2})", GEN_AT or "")
+    if m:
+        try: return _dt.date(*map(int, m.groups()))
+        except ValueError: pass
+    return _dt.date.today()
+
+BASE_DATE = _base_date()
+
 def dday(clse):
     m = re.match(r"(\d{4})-(\d{2})-(\d{2})", clse or "")
     if not m: return None
-    import datetime
-    d = datetime.date(*map(int, m.groups()))
-    return (d - datetime.date(2026, 7, 18)).days
+    try: d = _dt.date(*map(int, m.groups()))
+    except ValueError: return None
+    return (d - BASE_DATE).days
 
 import glob as _glob
 have_report = set(re.findall(r"report_([A-Za-z0-9]+)\.html", " ".join(_glob.glob("report_*.html"))))
@@ -111,6 +126,10 @@ json.dump(new_store, open("store.json", "w", encoding="utf-8"), ensure_ascii=Fal
 
 nGo = sum(1 for d in data if d["verdict"] == "적극 검토")
 nCond = sum(1 for d in data if d["verdict"] == "조건부 검토")
+# 미분석 = 개별 과업분석 리포트(reports_data/*.json)가 아직 없는 공고.
+# 공고 목록은 매일 자동으로 갈리는데 리포트는 수동 작성이라 반드시 밀린다.
+# 이 숫자를 감추면 상단 KPI가 '검토 결과'가 아니라 '작업 적체량'을 조용히 대신 표시하게 된다.
+nNA = sum(1 for d in data if not d["verdict"])
 nNear = sum(1 for d in data if d["dday"] is not None and 0 <= d["dday"] <= 7)
 nNew = sum(1 for d in data if d["isNew"])
 nS = sum(1 for d in data if d["grade"] == "S")
@@ -140,7 +159,12 @@ HTML = r"""<!DOCTYPE html>
 <title>나라장터 공고 스캔 대시보드</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- 본문은 Pretendard 하나로 간다. Noto Sans KR(한글 5웨이트)을 같이 받고 있었으나
+     font-family 우선순위상 Pretendard가 항상 이겨서 한 번도 그려지지 않는 사(死)폰트였다.
+     한글 웹폰트는 용량이 커서 폰에서 특히 손해 → 제거. 폴백은 OS 기본 한글 서체가 받는다.
+     숫자는 .mono(IBM Plex Mono)가 계속 쓰므로 그것만 남긴다. -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{
@@ -151,7 +175,7 @@ HTML = r"""<!DOCTYPE html>
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--canvas);color:var(--ink);
- font-family:'Pretendard','Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+ font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
  line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding:34px 26px 60px}
 .wrap{max-width:1180px;margin:0 auto}
 .mono{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:-.01em}
@@ -357,6 +381,32 @@ tr.urgent-row td{background:var(--rd-bg)!important}
 .foot{margin-top:18px;font-size:11.5px;color:var(--muted);line-height:1.8}
 .foot code{background:#E7E5E0;padding:1px 6px;border-radius:5px;font-size:11px}
 @media(max-width:860px){.kpis{grid-template-columns:1fr 1fr}.hide-sm{display:none}}
+/* 폰 대응 — 대표가 이동 중에 폰으로 여는 화면이다.
+   표가 7열이라 좁은 화면에서 글자가 뭉개지므로, 열을 단계적으로 접고
+   그래도 넘치면 레이아웃을 깨뜨리는 대신 표 카드 안에서만 가로 스크롤시킨다. */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:640px){
+ body{padding:20px 12px 44px}
+ h1{font-size:23px}
+ .sub{font-size:12.5px}
+ .kpis{grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 14px}
+ .kpi{padding:15px 16px;min-height:96px;border-radius:15px}
+ .kpi .n{font-size:25px} .kpi .l{font-size:11.5px} .kpi .cap{font-size:10.5px}
+ .kpi .ic{display:none}
+ .brief{gap:8px 12px;font-size:12px;padding:11px 13px}
+ .acard{padding:16px 15px} .brow{grid-template-columns:76px 1fr 34px}
+ .phead{padding:13px 12px 10px} .chips{padding:0 12px 10px}
+ .search input{width:100%;max-width:none}
+ .tools{width:100%}
+ .search{width:100%}
+ table{min-width:560px}          /* 이보다 좁아지면 표 안에서 가로 스크롤 */
+ thead th,tbody td{padding:11px 12px}
+ .hide-xs{display:none}
+ .rlinks{gap:6px} .rlinks button,.rlinks a{font-size:11.5px;padding:5px 10px}
+ .modal{padding:0}
+ .modalbox{width:100vw;height:100vh;max-height:100vh;border-radius:0}
+ .modalbox iframe{height:calc(100vh - 46px)}
+}
 </style></head>
 <body><div class="wrap">
 <div class="eyebrow">나라장터 · 공공디자인 공고 스캔</div>
@@ -371,7 +421,8 @@ __KWPANEL__
  <span><b class="go mono">__NGO__</b> 건 적극 검토</span><span class="sep">·</span>
  <span><b class="cond mono">__NCOND__</b> 건 조건부</span><span class="sep">·</span>
  <span>마감 D-7 이내 <b class="near mono">__NNEAR__</b> 건</span><span class="sep">·</span>
- <span>오늘 신규 <b class="mono" style="color:var(--accent)">__NNEW__</b> 건</span>
+ <span>오늘 신규 <b class="mono" style="color:var(--accent)">__NNEW__</b> 건</span><span class="sep">·</span>
+ <span style="color:var(--muted)">미분석 <b class="mono" style="color:var(--ink2)">__NNA__</b> 건</span>
  <span style="color:var(--muted);font-size:12px">— 판정순 정렬, 위에서부터 공략</span>
 </div>
 
@@ -397,9 +448,9 @@ __KWPANEL__
    <div><div class="n mono">__NREGION__</div><div class="cap">지역 우선 타깃</div></div>
  </div>
  <div class="kpi">
-   <div class="top"><span class="l">최대 기초금액</span>
-     <span class="ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span></div>
-   <div><div class="n mono">__MAXAMT__</div><div class="cap">단일 공고 최대</div></div>
+   <div class="top"><span class="l">마감 임박</span>
+     <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span></div>
+   <div><div class="n mono" style="color:__NEARCOL__">__NNEAR__</div><div class="cap">D-7 이내 · 최대 __MAXAMT__</div></div>
  </div>
 </div>
 
@@ -428,6 +479,7 @@ __KWPANEL__
    <span class="chip" data-k="verdict" data-v="적극 검토">적극 검토</span>
    <span class="chip" data-k="verdict" data-v="조건부 검토">조건부</span>
    <span class="chip" data-k="verdict" data-v="보류">보류</span>
+   <span class="chip" data-k="verdict" data-v="__NA__">미분석</span>
    <span class="lab" style="margin-left:8px">RFP</span>
    <span class="chip on" data-k="rfp" data-v="">전체</span>
    <span class="chip" data-k="rfp" data-v="자동추출">자동추출</span>
@@ -441,15 +493,17 @@ __KWPANEL__
    <span class="chip" data-k="due" data-v="near">임박 D-7</span>
    <span class="chip" data-k="due" data-v="new">신규 NEW</span>
  </div>
+ <div class="tscroll">
  <table>
  <thead><tr>
    <th>판정</th><th>공고명 / 수요기관</th>
    <th class="sortable" data-s="amt">기초금액<span class="ar" id="ar-amt"></span></th>
    <th class="sortable" data-s="dday">마감<span class="ar" id="ar-dday"></span></th>
-   <th>RFP 확보</th><th class="hide-sm">지역</th><th class="hide-sm">매칭키워드</th>
+   <th class="hide-xs">RFP 확보</th><th class="hide-sm">지역</th><th class="hide-sm">매칭키워드</th>
  </tr></thead>
  <tbody id="tb"></tbody>
  </table>
+ </div>
  <div class="empty" id="empty" style="display:none">조건에 맞는 공고가 없습니다.</div>
 </div>
 
@@ -526,7 +580,9 @@ function render(){
  let rows=DATA.filter(d=>{
    const near=d.dday!==null&&d.dday>=0&&d.dday<=7;
    const dueOk = !F.due || (F.due==="near"?near : F.due==="new"?d.isNew===true : true);
-   return (!F.verdict||d.verdict===F.verdict)&&(!F.rfp||d.rfp===F.rfp)&&
+   // "__NA__" = 미분석(판정 없음). verdict가 빈 문자열이라 일반 비교로는 '전체'와 구분되지 않아 센티널을 쓴다.
+   const vOk = !F.verdict || (F.verdict==="__NA__" ? !d.verdict : d.verdict===F.verdict);
+   return vOk&&(!F.rfp||d.rfp===F.rfp)&&
    (!F.region||d.region===true)&&dueOk&&(!q||(d.name+d.org).toLowerCase().includes(q));
  });
  if(sortKey){rows.sort((a,b)=>{let av=a[sortKey]??-1e9,bv=b[sortKey]??-1e9;return (av<bv?-1:av>bv?1:0)*sortDir;});}
@@ -558,7 +614,7 @@ function render(){
         <div class="rlinks">${startbtn}${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${urgent?'urgent':near?'near':''}">${ddTxt} ${urgentTag}</div></td>
-    <td><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
+    <td class="hide-xs"><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
     <td class="hide-sm">${d.region?'<span class="reg">부울경</span>':''}</td>
     <td class="hide-sm"><span class="kw">${esc(d.kw)}</span></td>
    </tr>`;
@@ -673,8 +729,13 @@ HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS).repla
             .replace("__GEN__", GEN_AT or "-").replace("__N__", str(len(data)))
             .replace("__NS__", str(nS)).replace("__NAUTO__", str(nAuto))
             .replace("__NGO__", str(nGo)).replace("__NCOND__", str(nCond)).replace("__NNEAR__", str(nNear))
-            .replace("__NNEW__", str(nNew))
+            .replace("__NNEW__", str(nNew)).replace("__NNA__", str(nNA))
+            .replace("__NEARCOL__", "var(--rd)" if nNear else "var(--ink)")
             .replace("__NREGION__", str(nRegion)).replace("__MAXAMT__", maxAmt))
-open("g2b_dashboard.html", "w", encoding="utf-8").write(HTML)
-print(f"g2b_dashboard.html 생성 · 채택 {len(data)} / 적극검토 {nGo} / 조건부 {nCond} / "
-      f"마감임박(D-7) {nNear} / 신규(NEW) {nNew} / 부울경 {nRegion} / 자동추출 {nAuto}")
+# GitHub Pages가 실제로 서빙하는 파일은 index.html이다. 예전에는 이 스크립트가
+# g2b_dashboard.html만 쓰고 index.html 복사는 코드 밖(일일 배치)에서 이뤄져서,
+# 로컬에서 빌드만 하면 화면이 안 바뀌는 것처럼 보이는 함정이 있었다. 여기서 같이 쓴다.
+for _out in ("g2b_dashboard.html", "index.html"):
+    open(_out, "w", encoding="utf-8").write(HTML)
+print(f"g2b_dashboard.html + index.html 생성 · 채택 {len(data)} / 적극검토 {nGo} / 조건부 {nCond} / "
+      f"마감임박(D-7) {nNear} · 미분석 {nNA} / 신규(NEW) {nNew} / 부울경 {nRegion} / 자동추출 {nAuto}")
