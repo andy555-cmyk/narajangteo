@@ -101,7 +101,7 @@ git push          # Deploy key(SSH)로 바로 나감
 
 ### 🔴 이 저장소는 자동 갱신 봇과 공유한다 — 미커밋이 곧 충돌이다
 
-`narajangteo-bot`이 **원격 클라우드 스케줄**(트리거 `trig_01Ky6Di7tahAcGgtYuuwx6Wq`)로 **매일 10시 KST**에 커밋한다. 이 맥의 전원 상태와 무관하며 7일 연속 실적이 있다.
+`narajangteo-bot`이 **원격 클라우드 스케줄**로 **매일 10시 KST**에 커밋한다. 이 맥의 전원 상태와 무관하며 7일 연속 실적이 있다.
 
 봇이 매 커밋마다 건드리는 파일: `g2b_dashboard.html` · `index.html` · `attachments.json` · `specs.json` · `store.json` · `g2b_result.csv` · `__pycache__/*.pyc`
 
@@ -109,7 +109,7 @@ git push          # Deploy key(SSH)로 바로 나감
 
 ### 이 저장소에 걸린 교차 병목 (본부 보드 §3)
 
-- **가격 체계 충돌** — 월 구독(22,000/300,000) vs 건당 고정가. 지도엔진(라움 구독안)과 함께 걸려 있다. Andy 결정
+- **가격 체계 미확정** — 상세는 본부 보드 §3. 여기서 결정하지 않는다
 - **자사 실적 데이터 입력** — 시스템으로 대신할 수 없다. Andy 또는 남실장님이 직접
 
 ### 기술 부채
