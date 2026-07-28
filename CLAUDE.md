@@ -4,7 +4,7 @@
 
 ## 세션 시작 시 먼저 읽을 것
 
-본부(HQ) = `/Users/iseung-won/Library/CloudStorage/GoogleDrive-ganpan0@gmail.com/내 드라이브/hayday-hq`
+본부(HQ) = `~/Library/CloudStorage/GoogleDrive-*/내 드라이브/hayday-hq`
 
 | 파일 | 내용 |
 |---|---|
@@ -48,7 +48,11 @@ git push          # Deploy key(SSH)로 바로 나감
 - **A4 가로 `986 × 696.76`** (프레임명 `A4 기준_가로`). 16:9도 1587×1123도 아니다.
 - 비율 1.4150 ≈ √2 라서 **제출 규격이 A3 가로여도 같은 비율 → 그대로 확대 출력**된다.
 - ⚠ 확정 원고 14페이지의 AI 프롬프트가 `--ar 16:9`로 끝난다 → **`--ar 99:70`으로 교체 필요.**
-- 폰트 표준(S-Core Dream vs Pretendard+IBM Plex Mono)은 **아직 미결**(H-3).
+- 폰트 **`S-Core Dream` · 자간 `-10`** (2026-07-28 확정, H-3).
+  - ⚠ 이건 **제안서 Figma 표준**이다. **웹 대시보드의 Pretendard는 그대로 둔다** — 통일 대상이 아니다.
+  - ⚠ 자간 "-10"의 단위 미확정(Adobe 1/1000em=-1% vs Figma -10%) → 표준 1장에서 두 벌 비교 후 확정.
+  - ⚠ Figma에 서체가 로드되지 않으면 **조용히 대체 서체로 렌더**된다. `get_screenshot`
+    (`enableBase64Response: true` 필수)으로 실제 적용 여부를 눈으로 확인하고 넘어갈 것.
 
 ## 이 저장소에서 조심할 것 (실측으로 확인된 함정)
 
