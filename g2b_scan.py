@@ -269,6 +269,7 @@ def main():
             "strong": KW_STRONG, "weak": KW_WEAK, "neg": NEG,
             "regions": REGIONS, "min_amt": MIN_AMT, "days_back": DAYS_BACK,
             "space": SPACE, "design_intent": DESIGN_INTENT,
+            "neg_soft": NEG_SOFT, "print_only": sorted(PRINT_ONLY),
         }, f, ensure_ascii=False)
     print(f"[저장] keywords.json (STRONG {len(KW_STRONG)} / WEAK {len(KW_WEAK)} / NEG {len(NEG)} "
           f"/ SPACE {len(SPACE)} × INTENT {len(DESIGN_INTENT)})")
