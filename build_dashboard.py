@@ -367,6 +367,11 @@ tbody tr:hover{background:#FBFAF8}
 .kchip.s{background:var(--accent-soft);color:var(--accent)}
 .kchip.w{background:#F1EFEB;color:var(--ink2)}
 .kchip.n{background:var(--rd-bg);color:var(--rd)}
+/* 조합 키워드 — 단독으로는 효력이 없으므로 점선으로 구분한다 */
+.kchip.sp{background:#EEF5FB;color:#2B6E9E;border:1px dashed #A8C8DE}
+.kchip.di{background:#F0F7F1;color:#2E7D50;border:1px dashed #A9CDB5}
+.kchip.ns{background:#FBF4E8;color:#8A6A24;border:1px dashed #D8BE86}
+.kwand{display:inline-block;margin:3px 8px 0 4px;font-size:12px;font-weight:800;color:var(--muted)}
 .kwmeta{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.7;border-top:1px solid var(--line);padding-top:11px}
 /* 보고서 팝업(모달) */
 .modal{position:fixed;inset:0;background:rgba(20,18,16,.55);display:none;z-index:200;align-items:center;justify-content:center;padding:24px}
@@ -759,20 +764,47 @@ RFPBARS = bars(RFP_STAT, max((s["n"] for s in RFP_STAT), default=1), colored=Tru
 import html as _html
 def _kc(lst, cls):
     return "".join('<span class="kchip %s">%s</span>' % (cls, _html.escape(str(k))) for k in lst)
-_strong = KWP.get("strong", []); _weak = KWP.get("weak", []); _neg = KWP.get("neg", [])
+_strong = KWP.get("strong", []); _weak = KWP.get("weak", []); _neg_all = KWP.get("neg", [])
+_space = KWP.get("space", []); _intent = KWP.get("design_intent", [])
+_negsoft = KWP.get("neg_soft", []); _printonly = KWP.get("print_only", [])
+# 조건부 제외(설계 3종)는 하드 제외와 성격이 달라 따로 보여준다
+_neg = [k for k in _neg_all if k not in _negsoft]
 _regions = KWP.get("regions", []); _minamt = KWP.get("min_amt", 0); _days = KWP.get("days_back", 0)
+_combo = (
+ ('<div class="kwrow"><div class="kwlab">조합 키워드 · <b>공간유형 %d개 × 디자인의도 %d개</b>가 '
+  '<b>함께</b> 있을 때만 채택 (한쪽만으로는 안 잡는다)</div>%s<span class="kwand">AND</span>%s</div>')
+ % (len(_space), len(_intent), _kc(_space,"sp"), _kc(_intent,"di"))
+) if (_space and _intent) else ""
+_soft = (
+ ('<div class="kwrow"><div class="kwlab">조건부 제외 (%d) · 원래 제외어지만 <b>핵심 키워드가 함께 있으면 통과</b>'
+  ' — 경관 과업이 「기본 및 실시설계」로 발주되는 경우 대응</div>%s</div>')
+ % (len(_negsoft), _kc(_negsoft,"ns"))
+) if _negsoft else ""
+_prn = (
+ ('<div class="kwrow"><div class="kwlab">인쇄물 조합 차단 (%d) · 보조 키워드가 <b>이 안에서만</b> 걸리면 제외'
+  ' — 단순 인쇄물 제작 컷</div>%s</div>') % (len(_printonly), _kc(_printonly,"ns"))
+) if _printonly else ""
 KWPANEL = (
  '<details class="kwbox"><summary>🔎 이 대시보드가 자동으로 긁는 검색 키워드 '
  '<b style="color:var(--accent)">%d</b>개 <span class="cta">펼쳐보기 ▾</span></summary>'
  '<div class="kwbody">'
  '<div class="kwrow"><div class="kwlab">핵심 키워드 · 1개만 걸려도 채택 (%d)</div>%s</div>'
+ '%s'
  '<div class="kwrow"><div class="kwlab">보조 키워드 · 2개 이상 겹치면 채택 (%d)</div>%s</div>'
+ '%s'
  '<div class="kwrow"><div class="kwlab">제외 키워드 · 이 단어가 있으면 자동 제외 (%d)</div>%s</div>'
+ '%s'
  '<div class="kwmeta">지역 태깅: %s 등 · 기초금액 하한 <b>%s원</b> · 최근 <b>%d일</b> 게시분 중 진행중(마감 전)만 · '
+ '<b>참가자격·업종등록은 채택 조건에 넣지 않는다</b>(2026-07-30 결정 — 수집 우선, 응찰 판단은 사람이) · '
  '키워드 추가·수정은 스캐너(g2b_scan.py)에서 관리</div>'
  '</div></details>'
-) % (len(_strong)+len(_weak), len(_strong), _kc(_strong,"s"),
-     len(_weak), _kc(_weak,"w"), len(_neg), _kc(_neg,"n"),
+) % (len(_strong)+len(_weak)+len(_space)+len(_intent),
+     len(_strong), _kc(_strong,"s"),
+     _combo,
+     len(_weak), _kc(_weak,"w"),
+     _prn,
+     len(_neg), _kc(_neg,"n"),
+     _soft,
      ", ".join(_regions[:8]), won_fmt(_minamt), _days)
 
 HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS).replace("__KWPANEL__", KWPANEL)
