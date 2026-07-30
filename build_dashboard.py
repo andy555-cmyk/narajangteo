@@ -72,6 +72,26 @@ try:
 except Exception:
     SPECS = {}
 
+# 참가자격 태그 (v2.4) — 공고번호 → {req:[태그], region_limit, consortium, confidence}
+# ⚠ 이건 '채택 조건'이 아니다. 수집은 자격과 무관하게 넓게 한다(2026-07-30 대표 결정).
+#   여기 값은 대표가 화면에서 보유 자격을 체크했을 때 **표시·필터**에만 쓴다.
+try:
+    _Q = json.load(open("qualifications.json", encoding="utf-8"))
+    QUAL_TAGS = _Q.get("tags", {})
+    _CUR = _Q.get("curated", _Q.get("items", {}))    # 사람·LLM 검수본 (우선)
+    _AUTO = _Q.get("auto", {})                        # 배치 규칙 기반 자동판독
+except Exception:
+    QUAL_TAGS, _CUR, _AUTO = {}, {}, {}
+
+def qual_of(no):
+    """검수본이 있으면 그것을, 없으면 자동판독을 쓴다. 출처를 src로 알려준다."""
+    if no in _CUR:
+        return dict(_CUR[no], src="검수")
+    if no in _AUTO:
+        return dict(_AUTO[no], src="자동")
+    return {"req": [], "region_limit": "", "consortium": "", "confidence": "불확실", "src": "없음"}
+HOME_REGION = "부산광역시"   # 자사 본점 소재지 — 지역제한 판정 기준
+
 # 제안서 착수 결정 — 공고번호 → {status:"진행", figma:"url", started:"date"}
 try:
     DECIDE = json.load(open("decisions.json", encoding="utf-8"))
@@ -92,6 +112,7 @@ for r in rows:
     limited = bool(pr) and ("제한없음" not in pr) and ("전국" not in pr)
     ours = any(rg in pr for rg in REGIONS_D)
     region_gate = "block" if (limited and not ours) else ("ok" if (limited and ours) else "")
+    _q = qual_of(no)
     data.append({
         "grade": r["등급"], "rfp": r["RFP"], "region": r["지역매칭"] == "Y",
         "name": r["공고명"], "org": r["수요기관"], "amt": amt, "amtLabel": won_fmt(r["기초금액"]),
@@ -103,6 +124,8 @@ for r in rows:
         "prtcpt": pr, "gate": region_gate,
         "spec": SPECS.get(no, []),
         "decided": DECIDE.get(no) or {},
+        "req": _q["req"], "regLimit": _q["region_limit"],
+        "cons": _q["consortium"], "qconf": _q["confidence"], "qsrc": _q["src"],
     })
 # === 자동 1차 분류 (v2.2 · 2026-07-30) =========================================
 # ⚠ 이것은 '판정'이 아니다. 사람이 쓴 과업분석 리포트(reports_data/*.json)의 판정만이 판정이다.
@@ -413,6 +436,37 @@ tr.urgent-row td{background:var(--rd-bg)!important}
 .autob.a-A{color:var(--accent);border-color:var(--accent);background:#FFF4F0}
 .autob.a-B{color:#8A6A24;border-color:#D8BE86;background:#FBF6EA}
 .autob.a-C{color:#9C9992;border-color:#DDD9D2;background:#F7F6F3}
+/* 참가자격 뱃지 */
+.qb{display:inline-block;margin-top:5px;padding:2px 7px;border-radius:6px;font-size:10.5px;
+ font-weight:700;white-space:nowrap;cursor:help}
+.qb.ok{background:var(--gn-bg);color:var(--gn)}
+.qb.no{background:var(--rd-bg);color:var(--rd)}
+.qb.na{background:#F1EFEB;color:var(--muted)}
+.qb.blk{background:#2B2B2B;color:#fff}
+/* 보유 자격 체크 패널 */
+.qbox{margin:18px 0 12px;border:2px solid var(--accent);border-radius:14px;background:#fff;overflow:hidden;
+ box-shadow:0 2px 14px -8px rgba(233,102,58,.5)}
+.qttl{font-size:14.5px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+.qttl::before{content:'\2713';display:inline-block;margin-right:7px;width:18px;height:18px;
+ line-height:18px;text-align:center;border-radius:5px;background:var(--accent);color:#fff;font-size:12px}
+.qsub{font-size:12px;color:var(--muted);font-weight:600}
+.qbox summary{cursor:pointer;padding:13px 16px;font-size:13px;font-weight:700;list-style:none;display:flex;
+ align-items:center;gap:8px;flex-wrap:wrap}
+.qbox summary::-webkit-details-marker{display:none}
+.qbody{padding:4px 16px 16px;border-top:1px solid var(--line)}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 14px;margin:10px 0}
+.qgrid label{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2);cursor:pointer;
+ padding:5px 7px;border-radius:8px}
+.qgrid label:hover{background:var(--soft)}
+.qgrid input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.qgrid .cnt{margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.qnote{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:6px}
+.qacts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.qacts button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 12px;
+ font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink2)}
+.qacts button:hover{background:var(--soft)}
+.qstat{font-size:12px;font-weight:700;color:var(--ink2);margin-left:auto;
+ background:var(--accent-soft);padding:4px 10px;border-radius:8px;white-space:nowrap}
 .brief{margin:16px 0 2px;font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);
  border-radius:12px;padding:12px 16px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 .brief b{font-weight:800}
@@ -514,6 +568,7 @@ __KWPANEL__
  </div>
 </div>
 
+__QUALPANEL__
 <div class="panel">
  <div class="phead">
    <div class="ptitle">타깃 공고 <span class="c">총 __N__건</span></div>
@@ -542,6 +597,10 @@ __KWPANEL__
    <span class="lab" style="margin-left:8px">지역</span>
    <span class="chip on" data-k="region" data-v="">전체</span>
    <span class="chip" data-k="region" data-v="1">부울경</span>
+   <span class="lab" style="margin-left:8px">자격</span>
+   <span class="chip on" data-k="qual" data-v="">전체</span>
+   <span class="chip" data-k="qual" data-v="ok">충족</span>
+   <span class="chip" data-k="qual" data-v="no">부족</span>
    <span class="lab" style="margin-left:8px">마감</span>
    <span class="chip on" data-k="due" data-v="">전체</span>
    <span class="chip" data-k="due" data-v="near">임박 D-7</span>
@@ -615,7 +674,40 @@ __KWPANEL__
 
 <script>
 const DATA = __DATA__;
-const F = {verdict:"", rfp:"", region:"", due:"", auto:""};
+const F = {verdict:"", rfp:"", region:"", due:"", auto:"", qual:""};
+// ── 참가자격 게이트 (v2.4) ─────────────────────────────────────────────
+// 우리가 '보유했다'고 체크한 자격만 충족으로 본다. 체크 전(미설정)에는 판정하지 않고
+// 요건 개수만 중립 표시한다. 이 값은 채택 여부를 바꾸지 않는다 — 표시·필터 전용.
+const QTAGS = __QTAGS__;
+const HOME  = "__HOME__";
+const QKEY  = "sigma_quals_v1";
+let MY = {set:false, have:[]};
+try { const v=JSON.parse(localStorage.getItem(QKEY)||"null"); if(v&&Array.isArray(v.have)) MY=v; } catch(e){}
+function regionBlocked(d){
+  if(!d.regLimit) return false;
+  return !d.regLimit.split(/[,·\/]/).some(x=>x.trim() && HOME.includes(x.trim().slice(0,2)));
+}
+const SRC_NOTE = {"검수":"", "자동":"\n※ 규칙 기반 자동판독(실측 재현율 91%) — 최종 확인은 공고문 원문", "없음":""};
+function qualState(d){
+  const sn = SRC_NOTE[d.qsrc]||"";
+  const auto = d.qsrc==="자동" ? " (자동)" : "";
+  if(d.qsrc==="없음") return {cls:"na", label:"자격 미판독",
+      tip:"이 공고는 제안요청서를 확보하지 못해 참가자격을 아직 읽지 못했다. 나라장터 공고문을 직접 확인할 것."};
+  if(regionBlocked(d)) return {cls:"blk", label:"지역 배제"+auto,
+      tip:"참가자격 본점 소재지 제한: "+d.regLimit+" (자사 "+HOME+")"+sn};
+  if(d.qconf==="불확실") return {cls:"na", label:"자격 확인 필요",
+      tip:"제안요청서 원문에서 참가자격 조항을 찾지 못했다. 나라장터 공고문을 직접 확인할 것."+sn};
+  if(!(d.req||[]).length) return {cls:(d.qsrc==="자동"?"na":"ok"), label:"자격 문턱 없음"+auto,
+      tip:"원문에서 별도 면허·업종등록 요건이 확인되지 않았다(나라장터 입찰참가자격 등록은 기본 전제)"+sn};
+  const miss=(d.req||[]).filter(t=>!MY.have.includes(t));
+  const names=t=>QTAGS[t]||t;
+  if(!MY.set) return {cls:"na", label:"요건 "+d.req.length+"종"+auto,
+      tip:"필요 자격: "+d.req.map(names).join(" · ")+"\n(위 「우리 보유 자격」에서 체크하면 충족 여부를 판정한다)"};
+  if(!miss.length) return {cls:"ok", label:"자격 충족"+auto, tip:"필요 자격 전부 보유: "+d.req.map(names).join(" · ")+sn};
+  return {cls:"no", label:"자격 부족 "+miss.length+auto, tip:"미보유: "+miss.map(names).join(" · ")+sn
+      +(d.cons==="허용"?"\n→ 공동수급 허용 건이므로 파트너로 보완 가능":"")
+      +(d.cons==="불허"?"\n⚠ 공동수급 불허 — 자체 보유가 아니면 참가 불가":"")};
+}
 let sortKey = null, sortDir = -1;   // 기본은 서버 판정순 유지, 헤더 클릭 시에만 정렬
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
  const k=c.dataset.k;
@@ -636,7 +728,9 @@ function render(){
    const dueOk = !F.due || (F.due==="near"?near : F.due==="new"?d.isNew===true : true);
    // "__NA__" = 미분석(판정 없음). verdict가 빈 문자열이라 일반 비교로는 '전체'와 구분되지 않아 센티널을 쓴다.
    const vOk = !F.verdict || (F.verdict==="__NA__" ? !d.verdict : d.verdict===F.verdict);
-   return vOk&&(!F.rfp||d.rfp===F.rfp)&&(!F.auto||d.auto===F.auto)&&
+   const qs=qualState(d);
+   const qOk = !F.qual || (F.qual==="ok" ? qs.cls==="ok" : (qs.cls==="no"||qs.cls==="blk"));
+   return vOk&&qOk&&(!F.rfp||d.rfp===F.rfp)&&(!F.auto||d.auto===F.auto)&&
    (!F.region||d.region===true)&&dueOk&&(!q||(d.name+d.org).toLowerCase().includes(q));
  });
  if(sortKey){rows.sort((a,b)=>{let av=a[sortKey]??-1e9,bv=b[sortKey]??-1e9;return (av<bv?-1:av>bv?1:0)*sortDir;});}
@@ -657,6 +751,7 @@ function render(){
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
    const vlab=d.verdict||'미분석'; const vcls=VC[d.verdict]||'na';
+   const qst=qualState(d);
    // 사람 판정이 없는 건에만 자동 1차 분류를 보여준다. 판정을 대체하지 않는다.
    const autoTag = d.verdict ? '' :
      `<div class="autob a-${d.auto}" title="자동 1차 분류(규칙 기반, 판정 아님) — ${esc((d.autoWhy||[]).join(' · '))||'해당 없음'}">자동 ${d.auto}</div>`;
@@ -665,7 +760,8 @@ function render(){
    const gateChip = d.gate==='block' ? ' <span class="gate block" title="'+esc(d.prtcpt)+'">타지역 전용</span>'
                   : d.gate==='ok' ? ' <span class="gate ok" title="'+esc(d.prtcpt)+'">지역제한</span>' : '';
    return `<tr class="${urgent?'urgent-row':''}">
-    <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span>${autoTag}</td>
+    <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span>${autoTag}
+        <div class="qb ${qst.cls}" title="${esc(qst.tip)}">${qst.label}</div></td>
     <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>${gateChip}
         <div class="org">${esc(d.org)}</div>
         <div class="rlinks">${startbtn}${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
@@ -741,6 +837,33 @@ function openSpec(no){
  document.getElementById('spectitle').textContent=d.name;
  document.getElementById('specmodal').classList.add('open');document.body.style.overflow='hidden';}
 function closeSpec(){document.getElementById('specmodal').classList.remove('open');document.body.style.overflow='';}
+// -- 보유 자격 체크 패널 --------------------------------------------
+function qSave(){
+  MY.have=[...document.querySelectorAll('.qgrid input:checked')].map(i=>i.dataset.t);
+  MY.set=true;
+  try{ localStorage.setItem(QKEY, JSON.stringify(MY)); }catch(e){}
+  qStatus(); render();
+}
+function qStatus(){
+  const el=document.getElementById('qstat'); if(!el) return;
+  if(!MY.set){ el.textContent='미설정 - 체크하면 참가 가능 여부가 갈립니다'; return; }
+  const n=DATA.filter(d=>qualState(d).cls==='ok').length;
+  el.textContent='보유 '+MY.have.length+'종 선택 -> 자격 충족 '+n+' / '+DATA.length+'건';
+}
+function qAll(v){ document.querySelectorAll('.qgrid input').forEach(i=>i.checked=v); qSave(); }
+function qReset(){
+  MY={set:false,have:[]};
+  try{ localStorage.removeItem(QKEY); }catch(e){}
+  document.querySelectorAll('.qgrid input').forEach(i=>i.checked=false);
+  qStatus(); render();
+}
+document.querySelectorAll('.qgrid input').forEach(i=>{
+  i.checked = MY.have.includes(i.dataset.t);
+  i.onchange = qSave;
+});
+// 아직 한 번도 설정하지 않았으면 패널을 펼쳐 둔다 — 못 찾고 지나치는 일을 막는다
+if(!MY.set){ const qb=document.getElementById('qbox'); if(qb) qb.open=true; }
+qStatus();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();closeSpec();closeStart();}});
 render();
 </script>
@@ -807,7 +930,43 @@ KWPANEL = (
      _soft,
      ", ".join(_regions[:8]), won_fmt(_minamt), _days)
 
-HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS).replace("__KWPANEL__", KWPANEL)
+# 참가자격 체크 패널 (v2.4)
+_qcnt = {}
+for _d in data:
+    for _t in _d["req"]:
+        _qcnt[_t] = _qcnt.get(_t, 0) + 1
+_order = sorted(QUAL_TAGS.items(), key=lambda kv: -_qcnt.get(kv[0], 0))
+_boxes = "".join(
+    '<label><input type="checkbox" data-t="%s"><span>%s</span><span class="cnt">%d건</span></label>'
+    % (t, _html.escape(label), _qcnt.get(t, 0)) for t, label in _order)
+_nlimit = sum(1 for _d in data if _d["regLimit"])
+_ncons = sum(1 for _d in data if _d["cons"] == "불허")
+QUALPANEL = (
+    '<details class="qbox" id="qbox"><summary>'
+    '<span class="qttl">우리 회사 업종·면허 체크</span>'
+    '<span class="qsub">체크하면 참가 가능한 공고만 걸러 봅니다</span>'
+    '<span class="qstat" id="qstat"></span></summary><div class="qbody">'
+    '<div class="qnote">우리가 <b>실제로 보유한 업종등록·면허·증명서</b>만 체크하세요. '
+    '체크한 것만 보유로 보고 각 공고에 「자격 충족 / 부족 N / 지역 배제」를 표시하며, '
+    '바로 아래 표의 <b>자격 필터</b>(전체·충족·부족)가 함께 동작합니다. 선택은 이 브라우저에 저장됩니다.<br>'
+    '<b>수집 자체는 자격과 무관하게 넓게 합니다</b> — 자격이 모자라 보이는 공고도 목록에서 지우지 않습니다'
+    '(2026-07-30 결정). 공동수급 허용 건은 파트너로 보완할 수 있어 뱃지 설명에 함께 적어 둡니다.</div>'
+    '<div class="qgrid">%s</div>'
+    '<div class="qacts"><button onclick="qAll(true)">전부 보유</button>'
+    '<button onclick="qReset()">초기화(미설정)</button></div>'
+    '<div class="qnote">자사 본점 소재지 <b>%s</b> 기준. 현재 목록 중 '
+    '<b>지역제한 %d건</b> · <b>공동수급 불허 %d건</b>.<br>'
+    '자격 출처: <b>검수 %d건</b>(RFP 원문 정독) · <b>자동판독 %d건</b>(배치 규칙 기반, 재현율 실측 91%%) · '
+    '<b>미판독 %d건</b>. 자동판독 건은 뱃지에 <b>(자동)</b>이 붙습니다 — 최종 확인은 공고문 원문으로 하세요.</div>'
+    '</div></details>') % (_boxes, _html.escape(HOME_REGION), _nlimit, _ncons,
+                           sum(1 for _d in data if _d["qsrc"]=="검수"),
+                           sum(1 for _d in data if _d["qsrc"]=="자동"),
+                           sum(1 for _d in data if _d["qsrc"]=="없음"))
+
+HTML = (HTML.replace("__QUALPANEL__", QUALPANEL)
+            .replace("__QTAGS__", json.dumps(QUAL_TAGS, ensure_ascii=False))
+            .replace("__HOME__", HOME_REGION)
+            .replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS).replace("__KWPANEL__", KWPANEL)
             .replace("__DATA__", json.dumps(data, ensure_ascii=False))
             .replace("__RAW__", str(RAW_TOTAL)).replace("__PERIOD__", PERIOD or "-")
             .replace("__GEN__", GEN_AT or "-").replace("__N__", str(len(data)))

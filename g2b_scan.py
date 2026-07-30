@@ -9,6 +9,7 @@
 import os, sys, json, csv, datetime, urllib.parse, requests
 from g2b_rfp import rfp_status, attachments_of, get_rfp_text   # RFP 판별·첨부·본문추출
 from g2b_spec import extract_spec                              # 제안서 작성기준(정성) 추출
+from g2b_qual import extract_qual, TAGS as QUAL_TAGS           # 입찰참가자격 태깅(v2.5)
 
 RFP_LABEL = {"RFP_API": "자동추출", "NOTICE_ONLY": "규격서별도", "NONE": "첨부없음"}
 
@@ -54,13 +55,7 @@ NEG = ["임대", "렌탈", "리스", "유지보수", "유지관리", "수학여�
        # ② 운영대행·플랫폼 운영 (계획수립이 아니라 위탁 운영)
        "위탁운영", "플랫폼 운영",
        # ③ 교육과정 설계·컨설팅 (디자인 단과대학 공고가 WEAK 2개로 새어 들어옴)
-       "교육과정",
-       # v2.3 (2026-07-30, Andy 결정) — 청사 건립·증축 계열 컷.
-       # 실측 노이즈: "여주 도시계획시설(공공청사:도로관리사무소) 조성사업 실시설계용역"이
-       #   STRONG "도시계획" + NEG_SOFT "실시설계" 조합으로 통과했다. 우리 업역(건축설계)이 아니다.
-       # ⚠ 하드 NEG다. "○○ 공공청사 공공디자인 가이드라인" 같은 건이 있으면 이것도 함께 죽는다.
-       #   그런 건이 실제로 뜨면 이 단어를 조건부로 바꾼다.
-       "공공청사"]
+       "교육과정"]
 # === 조건부 제외 (2026-07-28, Andy 결정) =========================================
 # 정책: 축제·행사의 **운영대행**은 뺀다. 그러나 축제·행사의 **경관·조명·공간 연출**은 남긴다.
 # 이건 단어 하나로 못 가른다 — NEG에 "축제"나 "운영 용역"을 넣으면 시그마애드가 실제로
@@ -287,20 +282,52 @@ def main():
         specs = {}
     keep_nos = {r["공고번호"] for r in rows}
     specs = {k: v for k, v in specs.items() if k in keep_nos}   # 사라진 공고 정리
+    # === 참가자격 자동 태깅 (v2.5) ===============================================
+    # qualifications.json 구조:
+    #   {"tags": {...}, "curated": {공고번호: {...}}, "auto": {공고번호: {...}}}
+    # · curated = 사람/LLM이 RFP를 읽고 검수한 태그. **자동값보다 우선한다.**
+    # · auto    = 이 배치가 규칙 기반으로 매일 채우는 태그. 새 공고도 다음날 바로 필터가 먹는다.
+    # 정확도 실측(2026-07-30, curated 35건 대조): 업종·면허 정밀도 93% / 재현율 91%,
+    #   지역제한 30/35, 공동수급 32/35. **완전하지 않으므로 화면에 '자동판독'으로 표시한다.**
+    try:
+        qual = json.load(open("qualifications.json", encoding="utf-8"))
+    except Exception:
+        qual = {}
+    qual.setdefault("tags", QUAL_TAGS)
+    qual["tags"] = QUAL_TAGS                     # 태그 사전은 코드가 정본
+    qual.setdefault("curated", {})
+    qual.setdefault("auto", {})
+    qual["curated"] = {k: v for k, v in qual["curated"].items() if k in keep_nos}
+    qual["auto"] = {k: v for k, v in qual["auto"].items() if k in keep_nos}
+
     fetched = 0
+    qnew = 0
     for no_key, it in rfp_items.items():
-        if no_key in specs:            # 캐시 히트 → 스킵
+        need_spec = no_key not in specs
+        need_qual = no_key not in qual["auto"]
+        if not (need_spec or need_qual):         # 둘 다 캐시 히트 → 다운로드 안 함
             continue
         try:
             res = get_rfp_text(it, key)
-            lines = extract_spec(res.get("text") or "")
-            specs[no_key] = lines
-            fetched += 1
-        except Exception as e:
-            specs[no_key] = []
+            text = res.get("text") or ""
+            if need_spec:
+                specs[no_key] = extract_spec(text)
+                fetched += 1
+            if need_qual:
+                qual["auto"][no_key] = extract_qual(text)
+                qnew += 1
+        except Exception:
+            if need_spec:
+                specs[no_key] = []
+            if need_qual:
+                qual["auto"][no_key] = {"req": [], "region_limit": "",
+                                        "consortium": "", "confidence": "불확실"}
     with open("specs.json", "w", encoding="utf-8") as f:
         json.dump(specs, f, ensure_ascii=False)
     print(f"[저장] specs.json (제안서 작성기준 {sum(1 for v in specs.values() if v)}건 · 신규추출 {fetched})")
+    with open("qualifications.json", "w", encoding="utf-8") as f:
+        json.dump(qual, f, ensure_ascii=False)
+    print(f"[저장] qualifications.json (검수 {len(qual['curated'])}건 / 자동 {len(qual['auto'])}건 · 신규자동 {qnew})")
 
     # 대시보드 자동 생성
     try:
