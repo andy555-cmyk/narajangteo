@@ -21,7 +21,7 @@ BASE = "https://apis.data.go.kr/1230000/ad/BidPublicInfoService/getBidPblancList
 
 # STRONG: 하나만 걸려도 우리 과업일 가능성 매우 높음
 KW_STRONG = ["공공디자인", "경관", "유니버설디자인", "유니버설 디자인", "서비스디자인", "서비스 디자인",
-             "웨이파인딩", "사인", "안내체계", "안내표지", "표지판", "환경디자인", "공공미술",
+             "웨이파인딩", "사인", "안내체계", "안내표지", "표지판", "환경디자인", "디자인환경", "공공미술",
              "도시브랜딩", "도시브랜드", "도시디자인", "도시재생", "색채", "야간경관", "경관계획",
              "가로환경", "가로경관", "디자인클러스터", "디자인 클러스터", "디자인혁신", "디자인 혁신",
              "디자인진흥", "공간디자인", "브랜드아이덴티티", "브랜드 아이덴티티", "슬로건", "정체성",
@@ -68,6 +68,47 @@ CRAFT_KEEP = ["경관", "조명", "연출", "공간조성", "공간연출", "디
 def is_ops_only(name):
     """운영대행 성격어만 있고 연출·경관·조성 과업어가 없으면 True(제외 대상)."""
     return any(k in name for k in OPS_COND) and not any(k in name for k in CRAFT_KEEP)
+
+# === 공간유형 × 디자인의도 조합 채택 (v2.2 · 2026-07-30 신설) ====================
+# 배경(실측): 부산광역시 공고 제2026-2348호
+#   「공원·유원지 디자인환경 개선사업 설계용역」(기초 9억 · 마감 2026-08-28 · 공원여가정책과)
+#   이 필터에서 통째로 누락됐다. 공고명에 STRONG이 0개였고("환경디자인"의 역순인
+#   "디자인환경"만 있었다), WEAK는 "디자인" 1개뿐이라 2개 규칙에 걸리지 못했다.
+#   입찰참가자격이 산업디자인전문회사(환경디자인 4442)라 명백히 우리 과업군이다.
+#
+# 규칙: 공공 공간유형어(SPACE) + 디자인/경관 의도어(DESIGN_INTENT)가 **함께** 있으면 STRONG 대우.
+#   한쪽만으로는 절대 채택하지 않는다 — "○○공원 수목 전정"(공간만) 이나
+#   "홍보물 디자인 제작"(의도만) 이 새어 들어오는 것을 막기 위함이다.
+#   이 스캐너는 애초에 **용역 전용 엔드포인트**(…ServcPPSSrch)만 훑으므로
+#   공사 공고는 구조적으로 유입되지 않는다. 조합 규칙을 안전하게 쓸 수 있는 이유다.
+SPACE = ["공원", "유원지", "광장", "녹지", "수변", "하천", "둘레길", "산책로", "보행로",
+         "전망대", "해수욕장", "해변", "포구", "어촌", "골목", "가로", "거리", "마을",
+         "쉼터", "놀이터", "정원", "수목원", "캠핑장", "야영장", "공공공간", "지하도상가",
+         "역세권", "터미널", "폐교", "유휴공간", "유휴부지", "옥상", "야외무대", "진입로"]
+DESIGN_INTENT = ["디자인", "경관", "환경개선", "환경 개선", "개선사업", "연출", "특화",
+                 "리뉴얼", "명소화", "정체성", "브랜딩", "이미지 개선", "공간조성", "공간구성"]
+
+def space_design_hits(name):
+    """공간유형어 + 디자인의도어가 함께 있으면 매칭어를 돌려준다(없으면 빈 리스트)."""
+    s = [k for k in SPACE if k in name]
+    d = [k for k in DESIGN_INTENT if k in name]
+    return (s[:2] + d[:2]) if (s and d) else []
+
+# --- 조건부 NEG (v2.2) ---------------------------------------------------------
+# "실시설계·건축설계·구조설계"는 토목·건축 용역을 자르려고 넣은 단어인데,
+# 경관·야간경관 과업은 실제로 「기본 및 실시설계」로 발주되는 경우가 많다.
+# 실측 반례: "수변공원 야간경관 연출 기본 및 실시설계" — 우리 과업인데 통째로 죽었다.
+# → STRONG 키워드가 함께 있으면 이 세 단어는 무시한다. 감리·측량은 우리 업역이 아니므로 유지.
+NEG_SOFT = ["실시설계", "건축설계", "구조설계"]
+
+# --- WEAK 2개 채택의 구조적 누수 차단 (v2.2 · H-24 잔여) ------------------------
+# "KCC 농구단 디자인 및 인쇄 홍보물 제작"처럼 단순 인쇄물 제작이 WEAK 2개로 새어 들어왔다.
+# 매칭된 WEAK가 아래 '인쇄물 제작' 집합 안에서만 나왔다면 채택하지 않는다.
+# 「가이드라인 편집디자인」처럼 집합 밖 단어가 하나라도 섞이면 그대로 살린다.
+PRINT_ONLY = {"디자인", "인쇄", "홍보물", "리플렛", "브로슈어", "굿즈"}
+
+def is_print_only(weak_hits):
+    return bool(weak_hits) and set(weak_hits).issubset(PRINT_ONLY)
 
 MIN_AMT   = 50_000_000   # 기초금액 하한 (5천만원)
 # 게시일 최근 30일을 훑고 '진행중(마감 미도래)'만 남김 → 좋은 공고가 시간 지나도
@@ -128,14 +169,21 @@ def main():
         seen_name.add(nkey)
         org  = (it.get("dminsttNm", "") or "") + " " + (it.get("ntceInsttNm", "") or "")
         region_fld = it.get("prtcptPsblRgnNm", "") or ""
-        if any(ng in name for ng in NEG):   # 부정키워드 우선 제외
+        strong = [k for k in KW_STRONG if k in name]
+        weak   = [k for k in KW_WEAK if k in name]
+        sdhit  = space_design_hits(name)   # 공간유형 × 디자인의도 조합 (v2.2)
+        # 부정키워드 — 하드는 무조건 제외, 소프트(설계 3종)는 STRONG 동반 시 통과
+        if any(ng in name for ng in NEG if ng not in NEG_SOFT):
+            continue
+        if any(ng in name for ng in NEG_SOFT) and not strong:
             continue
         if is_ops_only(name):               # 운영대행 전용 건 제외(연출·경관 동반 시엔 통과)
             continue
-        strong = [k for k in KW_STRONG if k in name]
-        weak   = [k for k in KW_WEAK if k in name]
-        # 채택 규칙: STRONG 1개 이상 OR WEAK 2개 이상
-        if not (strong or len(weak) >= 2):
+        # 채택 규칙: STRONG 1개 이상 OR 공간×디자인 조합 OR WEAK 2개 이상
+        if not (strong or sdhit or len(weak) >= 2):
+            continue
+        # WEAK 2개만으로 올라온 건이 '인쇄물 제작'뿐이면 제외 (H-24 잔여)
+        if not strong and not sdhit and is_print_only(weak):
             continue
         # 기초금액 하한 컷 (금액 확인되고 하한 미만이면 제외, 미상은 통과시켜 눈으로 확인)
         raw_amt = it.get("presmptPrce") or it.get("asignBdgtAmt") or ""
@@ -145,8 +193,9 @@ def main():
             amt_val = 0
         if amt_val and amt_val < MIN_AMT:
             continue
-        hit_kw = strong + weak
-        tier = "S" if strong else "W"
+        # 표시용 키워드: 중복 제거하되 등장 순서 유지
+        hit_kw = list(dict.fromkeys(strong + sdhit + weak))
+        tier = "S" if (strong or sdhit) else "W"
         blob = f"{name} {org} {region_fld}"
         is_region = any(rg in blob for rg in REGIONS)
         # 마감 여부
@@ -219,8 +268,10 @@ def main():
         json.dump({
             "strong": KW_STRONG, "weak": KW_WEAK, "neg": NEG,
             "regions": REGIONS, "min_amt": MIN_AMT, "days_back": DAYS_BACK,
+            "space": SPACE, "design_intent": DESIGN_INTENT,
         }, f, ensure_ascii=False)
-    print(f"[저장] keywords.json (STRONG {len(KW_STRONG)} / WEAK {len(KW_WEAK)} / NEG {len(NEG)})")
+    print(f"[저장] keywords.json (STRONG {len(KW_STRONG)} / WEAK {len(KW_WEAK)} / NEG {len(NEG)} "
+          f"/ SPACE {len(SPACE)} × INTENT {len(DESIGN_INTENT)})")
 
     # 제안서 작성기준(정성) 추출 → specs.json. 캐시: 이미 뽑은 공고는 재다운로드 안 함(공고번호 안정).
     try:
