@@ -72,6 +72,21 @@ try:
 except Exception:
     SPECS = {}
 
+# 데이터 공백 보충 (v2.6) — `data_fill.json`
+# 배경: 일일 배치 봇이 만든 specs.json·attachments.json 은 그 시점 필터로 잡힌 공고만 담는다.
+#   필터를 넓히면(v2.2) 새로 잡힌 공고는 base 데이터에 항목이 없어 「작성기준·서류」 버튼이 사라진다.
+#   실측 2026-07-30: 43건 중 13건이 공백이었고 그중 3건이 '적극 검토' 건이었다.
+# 규칙: **base 가 항상 우선.** 이 파일은 base 에 없는 키만 채운다.
+#   따라서 다음 배치가 base 를 재생성하면 이 파일은 자동으로 무효화된다(덮어쓰지 않는다).
+try:
+    _FILL = json.load(open("data_fill.json", encoding="utf-8"))
+    for _k, _v in (_FILL.get("specs") or {}).items():
+        SPECS.setdefault(_k, _v)
+    for _k, _v in (_FILL.get("attachments") or {}).items():
+        ATT.setdefault(_k, _v)
+except Exception:
+    _FILL = {}
+
 # 참가자격 태그 (v2.4) — 공고번호 → {req:[태그], region_limit, consortium, confidence}
 # ⚠ 이건 '채택 조건'이 아니다. 수집은 자격과 무관하게 넓게 한다(2026-07-30 대표 결정).
 #   여기 값은 대표가 화면에서 보유 자격을 체크했을 때 **표시·필터**에만 쓴다.
@@ -291,6 +306,17 @@ h1{font-size:30px;font-weight:800;letter-spacing:-.035em;line-height:1.12;margin
 .search input:focus{outline:none;border-color:var(--accent);background:#fff}
 .search svg{position:absolute;left:11px;top:9px;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.8}
 
+/* 필터 바 — 축(그룹)별로 세그먼트를 나눠 눈이 끊기게 한다.
+   평면 나열은 6개 축이 한 덩어리로 보여 무엇이 무엇의 선택지인지 읽히지 않았다. */
+.fbar{display:flex;flex-wrap:wrap;gap:14px 20px;padding:2px 16px 16px;align-items:flex-end}
+.fgrp{display:flex;flex-direction:column;gap:6px}
+.flab{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--muted);padding-left:2px}
+.seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+.seg .chip{padding:5px 11px;border:0;border-radius:8px;background:transparent;font-size:12px;
+ font-weight:600;color:var(--muted);box-shadow:none}
+.seg .chip:hover{color:var(--ink2);background:rgba(0,0,0,.03)}
+.seg .chip.on{background:#fff;color:var(--ink);font-weight:700;
+ box-shadow:0 0 0 1px rgba(0,0,0,.05),0 1px 2px -.5px rgba(0,0,0,.06),0 3px 3px -1.5px rgba(0,0,0,.04)}
 .chips{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 16px 12px}
 .chips .lab{font-size:11px;color:var(--muted);margin:0 3px}
 .chip{padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:#fff;
@@ -305,15 +331,36 @@ thead th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;letter
 thead th.sortable{cursor:pointer;user-select:none}
 thead th.sortable:hover{color:var(--accent)}
 thead th .ar{opacity:.55;font-size:9px;margin-left:2px}
-tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody td{padding:17px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody td:first-child{width:124px}
+/* 판정 셀의 뱃지는 세로로 쌓는다 — 옆으로 붙으면 판정과 자격이 한 덩어리로 읽힌다 */
+tbody td:first-child .vb,tbody td:first-child .autob,tbody td:first-child .qb{display:flex;width:fit-content}
+/* 숫자·날짜·지역 열은 절대 줄바꿈하지 않는다 (08-\n10, 부\n울\n경 깨짐 방지) */
+tbody td:nth-child(3),tbody td:nth-child(4),tbody td:nth-child(5),tbody td:nth-child(6){
+ white-space:nowrap;vertical-align:middle}
+tbody td:nth-child(4){width:78px}
+tbody td:nth-child(6){width:64px}
 tbody tr:last-child td{border-bottom:0}
 tbody tr:hover{background:#FBFAF8}
 .name{font-weight:600;color:var(--ink);text-decoration:none;letter-spacing:-.01em;font-size:13.5px}
 .name:hover{color:var(--accent);text-decoration:underline}
 .org{color:var(--muted);font-size:11.5px;margin-top:3px}
 .name{cursor:default}
-.rlinks{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn-report{font-family:inherit;font-size:12px;font-weight:700;color:#fff;background:var(--accent);border:0;padding:6px 13px;border-radius:8px;cursor:pointer;transition:.12s}
+/* 행 액션 — 솔리드는 '과업분석 보고서' 하나만. 나머지는 아웃라인·아이콘으로 내린다.
+   같은 무게의 버튼 5개가 나열되면 무엇부터 눌러야 하는지 알 수 없다. */
+.rlinks{margin-top:9px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rsep{width:1px;height:18px;background:var(--line);margin:0 3px}
+.ibtn{width:29px;height:29px;display:inline-flex;align-items:center;justify-content:center;
+ border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;padding:0;
+ position:relative;transition:.12s;color:var(--muted);text-decoration:none}
+.ibtn:hover{border-color:var(--ink2);color:var(--ink)}
+.ibtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;
+ stroke-linecap:round;stroke-linejoin:round}
+.ibtn .num{position:absolute;top:-6px;right:-6px;box-shadow:0 0 0 2px #fff;min-width:15px;height:15px;line-height:15px;
+ padding:0 3px;border-radius:8px;background:var(--ink);color:#fff;font-size:9.5px;font-weight:700;
+ text-align:center;font-variant-numeric:tabular-nums}
+.btn-report{font-family:inherit;font-size:12px;font-weight:700;color:#fff;background:var(--accent);border:0;padding:6px 14px;border-radius:9px;cursor:pointer;transition:.12s;
+ box-shadow:0 1px 2px -.5px rgba(0,0,0,.10),0 3px 3px -1.5px rgba(0,0,0,.06)}
 .btn-report:hover{filter:brightness(.94)}
 .btn-g2b{font-size:12px;font-weight:600;color:var(--ink2);text-decoration:none;background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:8px}
 .btn-g2b:hover{border-color:var(--accent);color:var(--accent)}
@@ -323,11 +370,12 @@ tbody tr:hover{background:#FBFAF8}
 .btn-spec{font-family:inherit;font-size:12px;font-weight:600;color:#7A5AA6;background:#F1ECF8;border:1px solid #DED0F0;padding:6px 12px;border-radius:8px;cursor:pointer}
 .btn-spec:hover{filter:brightness(.97)}
 /* 제안서 착수 버튼 + 진행중 상태 */
-.btn-start{font-family:inherit;font-size:12px;font-weight:800;color:#fff;background:var(--ink);border:0;padding:7px 14px;border-radius:8px;cursor:pointer;transition:.12s}
-.btn-start:hover{background:var(--accent)}
+.btn-start{font-family:inherit;font-size:12px;font-weight:700;color:var(--ink2);background:#fff;
+ border:1px solid var(--line);padding:6px 13px;border-radius:9px;cursor:pointer;transition:.12s}
+.btn-start:hover{border-color:var(--ink);color:var(--ink)}
 .btn-live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--gn);background:var(--gn-bg);border:1px solid #BDE5CD;padding:6px 12px;border-radius:8px}
 .btn-live .ld{width:8px;height:8px;border-radius:50%;background:var(--gn);animation:newpulse 1.8s ease-in-out infinite}
-.btn-figma{font-size:12px;font-weight:700;color:#fff;background:#1E1E1E;text-decoration:none;padding:6px 12px;border-radius:8px;display:inline-flex;align-items:center;gap:5px}
+.btn-figma{font-size:12px;font-weight:700;color:var(--ink2);background:#fff;border:1px solid var(--line);text-decoration:none;padding:6px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px}
 .btn-figma:hover{background:var(--accent)}
 /* 착수 모달 */
 .startbox{padding:22px 24px 24px;overflow-y:auto;max-height:calc(92vh - 46px)}
@@ -407,8 +455,8 @@ tbody tr:hover{background:#FBFAF8}
 .modalbox iframe{width:100%;height:calc(92vh - 46px);border:0;background:#EDECE8}
 .amt{font-weight:700;font-size:15px;white-space:nowrap}
 .kw{color:var(--muted);font-size:11px}
-.clse{font-weight:600;font-size:12.5px}
-.dd{font-size:11px;color:var(--muted);margin-top:2px}
+.clse{font-weight:600;font-size:12.5px;white-space:nowrap}
+.dd{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap}
 .dd.near{color:var(--rd);font-weight:700}
 
 /* 등급 pill */
@@ -478,7 +526,7 @@ tr.urgent-row td{background:var(--rd-bg)!important}
 .st-자동추출{color:var(--gn)} .st-자동추출 .d{background:var(--gn)}
 .st-규격서별도{color:var(--am)} .st-규격서별도 .d{background:var(--am)}
 .st-첨부없음{color:var(--rd)} .st-첨부없음 .d{background:var(--rd)}
-.reg{display:inline-block;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:600;background:var(--bl-bg);color:var(--bl)}
+.reg{display:inline-block;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:600;background:var(--bl-bg);color:var(--bl);white-space:nowrap}
 .empty{padding:44px;text-align:center;color:var(--muted);font-size:13px}
 
 .foot{margin-top:18px;font-size:11.5px;color:var(--muted);line-height:1.8}
@@ -577,34 +625,40 @@ __QUALPANEL__
        <input id="q" placeholder="공고명·기관 검색" oninput="render()"></div>
    </div>
  </div>
- <div class="chips">
-   <span class="lab">판정</span>
-   <span class="chip on" data-k="verdict" data-v="">전체</span>
-   <span class="chip" data-k="verdict" data-v="적극 검토">적극 검토</span>
-   <span class="chip" data-k="verdict" data-v="조건부 검토">조건부</span>
-   <span class="chip" data-k="verdict" data-v="보류">보류</span>
-   <span class="chip" data-k="verdict" data-v="__NA__">미분석</span>
-   <span class="lab" style="margin-left:8px">자동분류</span>
-   <span class="chip on" data-k="auto" data-v="">전체</span>
-   <span class="chip" data-k="auto" data-v="A">A 우선</span>
-   <span class="chip" data-k="auto" data-v="B">B</span>
-   <span class="chip" data-k="auto" data-v="C">C</span>
-   <span class="lab" style="margin-left:8px">RFP</span>
-   <span class="chip on" data-k="rfp" data-v="">전체</span>
-   <span class="chip" data-k="rfp" data-v="자동추출">자동추출</span>
-   <span class="chip" data-k="rfp" data-v="규격서별도">규격서별도</span>
-   <span class="chip" data-k="rfp" data-v="첨부없음">첨부없음</span>
-   <span class="lab" style="margin-left:8px">지역</span>
-   <span class="chip on" data-k="region" data-v="">전체</span>
-   <span class="chip" data-k="region" data-v="1">부울경</span>
-   <span class="lab" style="margin-left:8px">자격</span>
-   <span class="chip on" data-k="qual" data-v="">전체</span>
-   <span class="chip" data-k="qual" data-v="ok">충족</span>
-   <span class="chip" data-k="qual" data-v="no">부족</span>
-   <span class="lab" style="margin-left:8px">마감</span>
-   <span class="chip on" data-k="due" data-v="">전체</span>
-   <span class="chip" data-k="due" data-v="near">임박 D-7</span>
-   <span class="chip" data-k="due" data-v="new">신규 NEW</span>
+ <div class="fbar">
+   <div class="fgrp"><span class="flab">판정</span><div class="seg">
+     <span class="chip on" data-k="verdict" data-v="">전체</span>
+     <span class="chip" data-k="verdict" data-v="적극 검토">적극</span>
+     <span class="chip" data-k="verdict" data-v="조건부 검토">조건부</span>
+     <span class="chip" data-k="verdict" data-v="보류">보류</span>
+     <span class="chip" data-k="verdict" data-v="__NA__">미분석</span>
+   </div></div>
+   <div class="fgrp"><span class="flab">자격</span><div class="seg">
+     <span class="chip on" data-k="qual" data-v="">전체</span>
+     <span class="chip" data-k="qual" data-v="ok">충족</span>
+     <span class="chip" data-k="qual" data-v="no">부족</span>
+   </div></div>
+   <div class="fgrp"><span class="flab">마감</span><div class="seg">
+     <span class="chip on" data-k="due" data-v="">전체</span>
+     <span class="chip" data-k="due" data-v="near">임박 D-7</span>
+     <span class="chip" data-k="due" data-v="new">신규</span>
+   </div></div>
+   <div class="fgrp"><span class="flab">지역</span><div class="seg">
+     <span class="chip on" data-k="region" data-v="">전체</span>
+     <span class="chip" data-k="region" data-v="1">부울경</span>
+   </div></div>
+   <div class="fgrp"><span class="flab">자동분류</span><div class="seg">
+     <span class="chip on" data-k="auto" data-v="">전체</span>
+     <span class="chip" data-k="auto" data-v="A">A</span>
+     <span class="chip" data-k="auto" data-v="B">B</span>
+     <span class="chip" data-k="auto" data-v="C">C</span>
+   </div></div>
+   <div class="fgrp"><span class="flab">RFP 확보</span><div class="seg">
+     <span class="chip on" data-k="rfp" data-v="">전체</span>
+     <span class="chip" data-k="rfp" data-v="자동추출">자동추출</span>
+     <span class="chip" data-k="rfp" data-v="규격서별도">규격서별도</span>
+     <span class="chip" data-k="rfp" data-v="첨부없음">첨부없음</span>
+   </div></div>
  </div>
  <div class="tscroll">
  <table>
@@ -738,15 +792,18 @@ function render(){
    const near=d.dday!==null&&d.dday>=0&&d.dday<=7;
    const urgent=d.dday!==null&&d.dday>=0&&d.dday<=3;
    const ddTxt=d.dday===null?'':(d.dday<0?'마감':'D-'+d.dday);
+   // 주 액션(솔리드) 1개 + 보조(아웃라인) 1개 + 아이콘 3개로 위계를 만든다
    const rbtn = d.report
        ? `<button class="btn-report" onclick="openReport('${d.no}',this)">과업분석 보고서</button>`
        : `<span class="btn-wait">분석 준비중</span>`;
-   const gbtn = `<a class="btn-g2b" href="${d.url}" target="_blank" rel="noopener">나라장터 ↗</a>`;
-   const dbtn = (d.docs&&d.docs.length) ? `<button class="btn-doc" onclick="openDocs('${d.no}')">📎 서류 ${d.docs.length}</button>` : '';
-   const sbtn = (d.spec&&d.spec.length) ? `<button class="btn-spec" onclick="openSpec('${d.no}')">📋 작성기준</button>` : '';
+   const gbtn = `<a class="ibtn" href="${d.url}" target="_blank" rel="noopener" title="나라장터 공고 원문 열기">${IC.link}</a>`;
+   const dbtn = (d.docs&&d.docs.length)
+       ? `<button class="ibtn" onclick="openDocs('${d.no}')" title="첨부 서류 ${d.docs.length}건 — 과업지시서·제안요청서·공고문">${IC.clip}<span class="num">${d.docs.length}</span></button>` : '';
+   const sbtn = (d.spec&&d.spec.length)
+       ? `<button class="ibtn" onclick="openSpec('${d.no}')" title="제안서 작성기준 — 판형·분량·제출방법·유의사항">${IC.doc}</button>` : '';
    const dec = d.decided||{};
    const startbtn = dec.status
-       ? `<span class="btn-live"><span class="ld"></span>제안서 진행중</span>`+(dec.figma?`<a class="btn-figma" href="${dec.figma}" target="_blank" rel="noopener">피그마 ↗</a>`:'')
+       ? `<span class="btn-live"><span class="ld"></span>진행중</span>`+(dec.figma?`<a class="btn-figma" href="${dec.figma}" target="_blank" rel="noopener">피그마 ↗</a>`:'')
        : `<button class="btn-start" onclick="openStart('${d.no}')">제안서 착수 →</button>`;
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
@@ -764,7 +821,7 @@ function render(){
         <div class="qb ${qst.cls}" title="${esc(qst.tip)}">${qst.label}</div></td>
     <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>${gateChip}
         <div class="org">${esc(d.org)}</div>
-        <div class="rlinks">${startbtn}${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
+        <div class="rlinks">${rbtn}${startbtn}<span class="rsep"></span>${sbtn}${dbtn}${gbtn}</div></td>
     <td><span class="amt mono">${d.amtLabel}</span></td>
     <td><span class="clse mono">${(d.clse||'').slice(5,10)||'-'}</span><div class="dd ${urgent?'urgent':near?'near':''}">${ddTxt} ${urgentTag}</div></td>
     <td class="hide-xs"><span class="st st-${d.rfp}"><span class="d"></span>${d.rfp}</span></td>
@@ -774,6 +831,11 @@ function render(){
  }).join('');
  document.getElementById('empty').style.display = rows.length?'none':'block';
 }
+const IC = {
+  doc:'<svg viewBox="0 0 24 24"><path d="M14 3H7a1 1 0 00-1 1v16a1 1 0 001 1h10a1 1 0 001-1V7z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/></svg>',
+  clip:'<svg viewBox="0 0 24 24"><path d="M16.5 7.5l-7 7a2.5 2.5 0 003.5 3.5l7.5-7.5a4.5 4.5 0 10-6.4-6.4L5.7 11.3a6.5 6.5 0 109.2 9.2l3.6-3.6"/></svg>',
+  link:'<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M10 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-4"/></svg>'
+};
 function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function openReport(no){document.getElementById('mframe').src='report_'+no+'.html';
  document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden';}
