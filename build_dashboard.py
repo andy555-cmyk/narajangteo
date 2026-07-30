@@ -522,6 +522,8 @@ tr.urgent-row td{background:var(--rd-bg)!important}
  background:var(--accent-soft);padding:4px 10px;border-radius:8px;white-space:nowrap}
 .brief{margin:16px 0 2px;font-size:14.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);
  border-radius:12px;padding:12px 16px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.brief>span{white-space:nowrap}
+.brief>span:last-child{white-space:normal}
 .brief b{font-weight:800}
 .brief .go{color:var(--gn)} .brief .cond{color:var(--am)} .brief .near{color:var(--rd)}
 .brief .sep{color:var(--line)}
@@ -545,6 +547,17 @@ thead th,.btn-report,.btn-start,.btn-g2b,.btn-doc,.btn-spec,.btn-wait,.btn-live,
    ⚠ text-wrap 은 '블록 컨테이너'에만 걸린다. span(.name·.kw)에 걸어도 듣지 않으므로
      body 에서 상속시키고 표 셀에도 명시한다. 미지원 브라우저는 종전 동작으로 되돌아간다. */
 body,tbody td,thead th,.qnote,.kwmeta,.specsec li,.brief,.startnote,.foot{text-wrap:pretty}
+/* v2.7b — 글자 크기 조절. zoom 은 폰트와 칸을 같은 비율로 키우므로
+   확대해도 줄바꿈 지점이 바뀌지 않는다(낱글자가 새로 생기지 않는다). */
+.fsbox{display:inline-flex;align-items:center;gap:7px;margin:14px 0 -4px;padding:5px 6px 5px 12px;
+ background:#fff;border:1px solid var(--line);border-radius:12px}
+.fslab{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.fsseg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.fsseg button{font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);background:transparent;
+ border:0;padding:5px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.12s}
+.fsseg button:hover{color:var(--ink2)}
+.fsseg button.on{background:#fff;color:var(--ink);font-weight:700;
+ box-shadow:0 0 0 1px rgba(0,0,0,.05),0 1px 2px -.5px rgba(0,0,0,.06),0 3px 3px -1.5px rgba(0,0,0,.04)}
 .empty{padding:44px;text-align:center;color:var(--muted);font-size:14.5px}
 
 .foot{margin-top:18px;font-size:13px;color:var(--muted);line-height:1.8}
@@ -583,7 +596,10 @@ body,tbody td,thead th,.qnote,.kwmeta,.specsec li,.brief,.startnote,.foot{text-w
 <h1>수주 타깃 공고 대시보드</h1>
 <div class="sub">스캔 기간 <b>__PERIOD__</b> · 전체 용역공고 <b class="mono">__RAW__</b>건 →
  필터 채택 <b class="mono">__N__</b>건 · 생성 __GEN__</div>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
 <div style="margin:14px 0 -4px"><a href="reports.html" style="display:inline-block;padding:9px 16px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:14.5px">과업분석 보고서 모음 (적극·조건부·보류) →</a></div>
+<div class="fsbox"><span class="fslab">글자 크기</span><div class="fsseg" id="fsseg"><button data-z="1">보통</button><button data-z="1.12">크게</button><button data-z="1.25">아주 크게</button></div></div>
+</div>
 __KWPANEL__
 
 <div class="brief">
@@ -947,6 +963,23 @@ if(!MY.set){ const qb=document.getElementById('qbox'); if(qb) qb.open=true; }
 qStatus();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDocs();closeSpec();closeStart();}});
 render();
+/* ── 글자 크기 3단계 ─────────────────────────────────────────────────────
+   폰트만 키우면 칸 폭이 그대로여서 글자가 쪼개진다. zoom 은 글자와 칸을
+   같은 비율로 늘리므로 줄바꿈 위치가 바뀌지 않는다. */
+const FSKEY='sigma_fs_v1';
+function fsApply(z,save){
+  document.body.style.zoom=z;
+  document.querySelectorAll('#fsseg button').forEach(b=>b.classList.toggle('on',b.dataset.z===String(z)));
+  if(save){ try{ localStorage.setItem(FSKEY,String(z)); }catch(e){} }
+}
+document.querySelectorAll('#fsseg button').forEach(b=>{
+  b.onclick=()=>fsApply(b.dataset.z,true);
+});
+(function(){
+  let z='1';
+  try{ const v=localStorage.getItem(FSKEY); if(v) z=v; }catch(e){}
+  fsApply(z,false);
+})();
 </script>
 </body></html>"""
 
