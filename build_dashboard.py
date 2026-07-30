@@ -104,8 +104,43 @@ for r in rows:
         "spec": SPECS.get(no, []),
         "decided": DECIDE.get(no) or {},
     })
-# 판정 우선 → 금액순 (붙을 것부터 위로)
-data.sort(key=lambda x: (VRANK.get(x["verdict"], 3), -x["amt"]))
+# === 자동 1차 분류 (v2.2 · 2026-07-30) =========================================
+# ⚠ 이것은 '판정'이 아니다. 사람이 쓴 과업분석 리포트(reports_data/*.json)의 판정만이 판정이다.
+#   자동 분류는 리포트를 아직 못 쓴 공고를 **어떤 순서로 손댈지** 정하기 위한 기계적 줄세우기다.
+#   화면에서도 '자동' 뱃지를 붙여 사람 판정과 절대 섞이지 않게 표시한다.
+# 배경: 채택 목록은 매일 자동으로 갈리는데 리포트는 수동이라 미분석이 계속 쌓인다
+#   (2026-07-30 실측 36건 중 28건 미분석). 미분석 28건이 전부 같은 회색 덩어리로 보이면
+#   무엇부터 열어야 할지 알 수 없다. 그것이 이 분류의 유일한 목적이다.
+AUTO_RANK = {"A": 0, "B": 1, "C": 2}
+
+def auto_class(d):
+    """규칙 기반 1차 분류. (등급, 점수, 근거리스트) — 추정·예측이 아니라 필드값의 합산이다."""
+    sc, why = 0, []
+    if d["grade"] == "S":
+        sc += 2; why.append("STRONG 매칭")
+    if d["region"]:
+        sc += 2; why.append("부·울·경")
+    if d["rfp"] == "자동추출":
+        sc += 1; why.append("RFP 자동추출")
+    if d["amt"] >= 300_000_000:
+        sc += 2; why.append("기초 3억↑")
+    elif d["amt"] >= 100_000_000:
+        sc += 1; why.append("기초 1억↑")
+    dd = d["dday"]
+    if dd is not None and 0 <= dd <= 2:
+        sc -= 2; why.append("마감 D-2 이내(착수 난이)")
+    elif dd is not None and dd >= 10:
+        sc += 1; why.append("준비기간 10일↑")
+    if d["gate"] == "block":
+        sc -= 5; why.append("타지역 전용 참가제한")
+    g = "A" if sc >= 6 else ("B" if sc >= 3 else "C")
+    return g, sc, why
+
+for d in data:
+    d["auto"], d["autoScore"], d["autoWhy"] = auto_class(d)
+
+# 판정 우선 → (미분석은 자동분류 우선) → 금액순. 붙을 것부터 위로.
+data.sort(key=lambda x: (VRANK.get(x["verdict"], 3), AUTO_RANK.get(x["auto"], 3), -x["amt"]))
 
 # 신규(NEW) 추적: store.json에 공고 첫 등장일 기록 → 오늘 처음 뜬 공고 표시
 import os
@@ -130,6 +165,9 @@ nCond = sum(1 for d in data if d["verdict"] == "조건부 검토")
 # 공고 목록은 매일 자동으로 갈리는데 리포트는 수동 작성이라 반드시 밀린다.
 # 이 숫자를 감추면 상단 KPI가 '검토 결과'가 아니라 '작업 적체량'을 조용히 대신 표시하게 된다.
 nNA = sum(1 for d in data if not d["verdict"])
+# 미분석 안에서 자동 1차 분류가 A인 건 = "리포트를 오늘 안에 써야 할 후보"
+nNAA = sum(1 for d in data if not d["verdict"] and d["auto"] == "A")
+nNAB = sum(1 for d in data if not d["verdict"] and d["auto"] == "B")
 nNear = sum(1 for d in data if d["dday"] is not None and 0 <= d["dday"] <= 7)
 nNew = sum(1 for d in data if d["isNew"])
 nS = sum(1 for d in data if d["grade"] == "S")
@@ -364,6 +402,12 @@ tr.urgent-row td{background:var(--rd-bg)!important}
 .vb.cond{background:var(--am-bg);color:var(--am)} .vb.cond .vd{background:var(--am)}
 .vb.hold{background:#F1EFEB;color:var(--muted)} .vb.hold .vd{background:var(--muted)}
 .vb.na{background:#F5F4F1;color:#B7B4AE} .vb.na .vd{background:#CFCCC6}
+/* 자동 1차 분류 뱃지 — 사람 판정이 없는 건에만 붙는다. 판정과 헷갈리지 않도록 점선 테두리. */
+.autob{display:inline-block;margin-top:5px;padding:2px 7px;border-radius:6px;font-size:10.5px;
+ font-weight:700;letter-spacing:.02em;border:1px dashed;white-space:nowrap;cursor:help}
+.autob.a-A{color:var(--accent);border-color:var(--accent);background:#FFF4F0}
+.autob.a-B{color:#8A6A24;border-color:#D8BE86;background:#FBF6EA}
+.autob.a-C{color:#9C9992;border-color:#DDD9D2;background:#F7F6F3}
 .brief{margin:16px 0 2px;font-size:13px;color:var(--ink2);background:#fff;border:1px solid var(--line);
  border-radius:12px;padding:12px 16px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 .brief b{font-weight:800}
@@ -422,8 +466,8 @@ __KWPANEL__
  <span><b class="cond mono">__NCOND__</b> 건 조건부</span><span class="sep">·</span>
  <span>마감 D-7 이내 <b class="near mono">__NNEAR__</b> 건</span><span class="sep">·</span>
  <span>오늘 신규 <b class="mono" style="color:var(--accent)">__NNEW__</b> 건</span><span class="sep">·</span>
- <span style="color:var(--muted)">미분석 <b class="mono" style="color:var(--ink2)">__NNA__</b> 건</span>
- <span style="color:var(--muted);font-size:12px">— 판정순 정렬, 위에서부터 공략</span>
+ <span style="color:var(--muted)">미분석 <b class="mono" style="color:var(--ink2)">__NNA__</b> 건<b class="mono" style="color:var(--accent)"> (자동 A __NNAA__ · B __NNAB__)</b></span>
+ <span style="color:var(--muted);font-size:12px">— 판정순 → 자동분류순 정렬, 위에서부터 공략</span>
 </div>
 
 <div class="kpis">
@@ -480,6 +524,11 @@ __KWPANEL__
    <span class="chip" data-k="verdict" data-v="조건부 검토">조건부</span>
    <span class="chip" data-k="verdict" data-v="보류">보류</span>
    <span class="chip" data-k="verdict" data-v="__NA__">미분석</span>
+   <span class="lab" style="margin-left:8px">자동분류</span>
+   <span class="chip on" data-k="auto" data-v="">전체</span>
+   <span class="chip" data-k="auto" data-v="A">A 우선</span>
+   <span class="chip" data-k="auto" data-v="B">B</span>
+   <span class="chip" data-k="auto" data-v="C">C</span>
    <span class="lab" style="margin-left:8px">RFP</span>
    <span class="chip on" data-k="rfp" data-v="">전체</span>
    <span class="chip" data-k="rfp" data-v="자동추출">자동추출</span>
@@ -561,7 +610,7 @@ __KWPANEL__
 
 <script>
 const DATA = __DATA__;
-const F = {verdict:"", rfp:"", region:"", due:""};
+const F = {verdict:"", rfp:"", region:"", due:"", auto:""};
 let sortKey = null, sortDir = -1;   // 기본은 서버 판정순 유지, 헤더 클릭 시에만 정렬
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
  const k=c.dataset.k;
@@ -582,7 +631,7 @@ function render(){
    const dueOk = !F.due || (F.due==="near"?near : F.due==="new"?d.isNew===true : true);
    // "__NA__" = 미분석(판정 없음). verdict가 빈 문자열이라 일반 비교로는 '전체'와 구분되지 않아 센티널을 쓴다.
    const vOk = !F.verdict || (F.verdict==="__NA__" ? !d.verdict : d.verdict===F.verdict);
-   return vOk&&(!F.rfp||d.rfp===F.rfp)&&
+   return vOk&&(!F.rfp||d.rfp===F.rfp)&&(!F.auto||d.auto===F.auto)&&
    (!F.region||d.region===true)&&dueOk&&(!q||(d.name+d.org).toLowerCase().includes(q));
  });
  if(sortKey){rows.sort((a,b)=>{let av=a[sortKey]??-1e9,bv=b[sortKey]??-1e9;return (av<bv?-1:av>bv?1:0)*sortDir;});}
@@ -603,12 +652,15 @@ function render(){
    const nameClick = d.report ? `onclick="openReport('${d.no}',this)" style="cursor:pointer"` : '';
    const VC={'적극 검토':'go','조건부 검토':'cond','보류':'hold'};
    const vlab=d.verdict||'미분석'; const vcls=VC[d.verdict]||'na';
+   // 사람 판정이 없는 건에만 자동 1차 분류를 보여준다. 판정을 대체하지 않는다.
+   const autoTag = d.verdict ? '' :
+     `<div class="autob a-${d.auto}" title="자동 1차 분류(규칙 기반, 판정 아님) — ${esc((d.autoWhy||[]).join(' · '))||'해당 없음'}">자동 ${d.auto}</div>`;
    const newBadge = d.isNew ? '<span class="newb">NEW</span> ' : '';
    const urgentTag = urgent ? '<span class="dtag">임박</span>' : '';
    const gateChip = d.gate==='block' ? ' <span class="gate block" title="'+esc(d.prtcpt)+'">타지역 전용</span>'
                   : d.gate==='ok' ? ' <span class="gate ok" title="'+esc(d.prtcpt)+'">지역제한</span>' : '';
    return `<tr class="${urgent?'urgent-row':''}">
-    <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span></td>
+    <td><span class="vb ${vcls}"><span class="vd"></span>${vlab}</span>${autoTag}</td>
     <td>${newBadge}<span class="name" ${nameClick}>${esc(d.name)}</span> <span class="g g-${d.grade}">${d.grade}</span>${gateChip}
         <div class="org">${esc(d.org)}</div>
         <div class="rlinks">${startbtn}${rbtn}${sbtn}${dbtn}${gbtn}</div></td>
@@ -730,6 +782,7 @@ HTML = (HTML.replace("__KWBARS__", KWBARS).replace("__RFPBARS__", RFPBARS).repla
             .replace("__NS__", str(nS)).replace("__NAUTO__", str(nAuto))
             .replace("__NGO__", str(nGo)).replace("__NCOND__", str(nCond)).replace("__NNEAR__", str(nNear))
             .replace("__NNEW__", str(nNew)).replace("__NNA__", str(nNA))
+            .replace("__NNAA__", str(nNAA)).replace("__NNAB__", str(nNAB))
             .replace("__NEARCOL__", "var(--rd)" if nNear else "var(--ink)")
             .replace("__NREGION__", str(nRegion)).replace("__MAXAMT__", maxAmt))
 # GitHub Pages가 실제로 서빙하는 파일은 index.html이다. 예전에는 이 스크립트가
