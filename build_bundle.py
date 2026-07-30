@@ -61,24 +61,26 @@ OUT = f"""<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 {STYLE}
 <style>
-#list{{max-width:860px;margin:0 auto}}
+#list{{max-width:960px;margin:0 auto}}
 .lhead{{margin-bottom:6px}}
-.lhead .eb{{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}}
-.lhead h1{{font-size:26px;font-weight:800;letter-spacing:-.03em;margin:6px 0 4px}}
-.lhead .s{{color:var(--muted);font-size:13px}}
-.legend{{display:flex;gap:16px;margin:16px 0 22px;font-size:12px;color:var(--muted);flex-wrap:wrap}}
+.lhead .eb{{font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}}
+.lhead h1{{font-size:28px;font-weight:800;letter-spacing:-.03em;margin:6px 0 4px}}
+.lhead .s{{color:var(--muted);font-size:14.5px}}
+.legend{{display:flex;gap:16px;margin:16px 0 22px;font-size:13.5px;color:var(--muted);flex-wrap:wrap}}
 .legend span{{display:inline-flex;align-items:center;gap:6px}}
-.grp{{font-size:13px;font-weight:800;letter-spacing:-.01em;margin:22px 0 8px;display:flex;align-items:center;gap:8px}}
-.grp .gc{{color:var(--muted);font-weight:600;font-size:12px}}
+/* v2.7 — 텍스트 확대. 외톨이 어절은 브라우저가 앞 줄에서 미리 넘긴다 */
+body,.rwhy,.rmeta,.rname,.legend{{text-wrap:pretty;word-break:keep-all;overflow-wrap:break-word}}
+.grp{{font-size:14.5px;font-weight:800;letter-spacing:-.01em;margin:22px 0 8px;display:flex;align-items:center;gap:8px}}
+.grp .gc{{color:var(--muted);font-weight:600;font-size:13.5px}}
 .gdot{{width:10px;height:10px;border-radius:50%}} .gdot.go{{background:var(--go)}} .gdot.cond{{background:var(--cond)}} .gdot.hold{{background:var(--hold)}}
 .row{{background:#fff;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:12px;padding:14px 16px;margin:8px 0;cursor:pointer;transition:.12s}}
 .row:hover{{box-shadow:0 8px 22px -14px rgba(0,0,0,.25);transform:translateY(-1px)}}
 .row.go{{border-left-color:var(--go)}} .row.cond{{border-left-color:var(--cond)}} .row.hold{{border-left-color:var(--hold)}}
-.rname{{font-size:14.5px;font-weight:700;letter-spacing:-.01em}}
-.rmeta{{font-size:11.5px;color:var(--muted);margin-top:3px}}
-.rwhy{{font-size:12px;color:var(--ink2);margin-top:6px;line-height:1.5}}
+.rname{{font-size:16px;font-weight:700;letter-spacing:-.01em}}
+.rmeta{{font-size:13px;color:var(--muted);margin-top:3px}}
+.rwhy{{font-size:13.5px;color:var(--ink2);margin-top:6px;line-height:1.5}}
 .back{{display:block;margin:0 auto 14px;max-width:210mm;width:100%;padding:9px;border:1px solid var(--line);
- background:#fff;border-radius:9px;font-family:inherit;font-size:13px;color:var(--ink2);cursor:pointer}}
+ background:#fff;border-radius:9px;font-family:inherit;font-size:14.5px;color:var(--ink2);cursor:pointer}}
 .back:hover{{border-color:var(--accent);color:var(--accent)}}
 body{{background:#EDECE8}}
 @media print{{#list,.back{{display:none!important}} .rep{{display:block!important}}}}
@@ -93,7 +95,7 @@ body{{background:#EDECE8}}
    <span><span class="gdot hold"></span>보류 = 자격·본질상 우리 일 아님</span>
  </div>
  {items}
- <div style="margin-top:26px;font-size:11px;color:var(--muted);line-height:1.7">
+ <div style="margin-top:26px;font-size:12.5px;color:var(--muted);line-height:1.7">
   판정은 RFP 원문 기반 분석 의견입니다. 팩트(배점·자격·일정)는 제안요청서에서 추출, 판정은 시그마애드 공공디자인·공간연출 역량 기준. 최종 결정 전 원문 대조 권장.</div>
 </div>
 {PAGES_HTML}
