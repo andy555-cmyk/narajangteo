@@ -1,0 +1,83 @@
+name: daily-scan
+
+# 나라장터 일일 수집·대시보드 갱신을 GitHub 안에서 직접 돌린다.
+# 종전: 클라우드 세션(코워크) 봇이 수집 → 커밋 → push
+#       └ 2026-08-06 push 가 git 프록시에 403 으로 막혀 갱신이 멈췄다(H-35).
+# 현재: GitHub Actions 가 수집부터 push 까지 전부 한다. 외부 토큰이 필요 없다.
+#
+# ⚠ 산출물(reports.html · g2b_reports.html · report_*.html)은 여기서 건드리지 않는다.
+#   그것들은 build.yml 담당이다.
+
+on:
+  schedule:
+    - cron: '0 1 * * *'      # 01:00 UTC = 10:00 KST (종전 봇과 같은 시각)
+  workflow_dispatch:          # Actions 탭 수동 실행 버튼
+
+concurrency:
+  group: daily-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 의존 설치
+        run: pip install --quiet requests olefile pdfplumber
+
+      - name: 수집 · 대시보드 생성 (전송 오류 시 재시도)
+        env:
+          SERVICE_KEY: ${{ secrets.SERVICE_KEY }}
+          TZ: Asia/Seoul
+        run: |
+          set -e
+          if [ -z "$SERVICE_KEY" ]; then
+            echo "!! SERVICE_KEY 시크릿이 비어있다 — 저장소 Settings > Secrets 에 등록할 것"
+            exit 1
+          fi
+          # 조달청 API 가 간헐적으로 연결을 끊는다(프록시 handshake reset).
+          # g2b_scan.py 에는 재시도가 없고, 실패하면 수집 앞단에서 멈춰 파일을 건드리지 않으므로
+          # 스크립트 전체를 다시 도는 것이 안전하다. specs·자격 캐시 덕에 재시도 비용도 낮다.
+          for i in 1 2 3 4 5; do
+            if python3 g2b_scan.py; then
+              echo "수집 성공 (시도 $i)"; exit 0
+            fi
+            echo "수집 실패 — 60초 후 재시도 ($i/5)"; sleep 60
+          done
+          echo "!! 5회 모두 실패"; exit 1
+
+      - name: 배포본 갱신
+        run: |
+          set -e
+          cp g2b_dashboard.html index.html
+
+      - name: 커밋 · 푸시
+        run: |
+          set -e
+          git config user.name  "narajangteo-bot"
+          git config user.email "bot@sigmaad.local"
+          git add index.html g2b_dashboard.html g2b_result.csv \
+                  attachments.json specs.json store.json qualifications.json
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"; exit 0
+          fi
+          # [skip ci] 를 붙여 build.yml 이 중복으로 다시 돌지 않게 한다
+          # (qualifications.json 이 build.yml 트리거 경로에 들어 있다)
+          git commit -m "일일 갱신 $(TZ=Asia/Seoul date +%Y-%m-%d) [skip ci]"
+          git push
+          echo "푸시 완료: $(git rev-parse --short HEAD)"
+
+      - name: 요약
+        if: always()
+        run: |
+          TZ=Asia/Seoul date +'실행시각 %Y-%m-%d %H:%M KST'
+          [ -f g2b_result.csv ] && echo "채택 $(( $(wc -l < g2b_result.csv) - 1 )) 건" || true
